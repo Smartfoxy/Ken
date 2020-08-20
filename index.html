@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ken_Ken</title>
+    <style>
+        .container {
+            width: 800px;
+            height: 800px;
+            background-color: lightblue;
+            margin: 50px auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+        .table {
+            border: 1px solid blue;
+            padding: 15px;
+        }
+        td {
+            border: 1px solid blue;
+            padding: 5px;
+            height: 20px;
+            width: 20px;
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="table">
+            <table></table>
+        </div>
+        
+    </div>
+
+    <script>
+        "use strict"
+
+        const num = 4;
+        //let arr = new Array(num);
+
+        class Cell {
+            constructor(row, col) {
+                this.row = row;
+                this.col = col;
+                this.fill = false;
+            }
+            fillNum(num) {
+                this.num = num;
+                this.fill = true;
+            }
+        }
+
+        let kenArr = createKen(num);
+        fillKen(kenArr);
+
+        console.log(kenArr);
+
+
+        function createKen(num) {
+            let kenArr = [];
+            for(let i = 0; i < num; i++) {
+                let rowArr = [];
+                for(let j = 0; j < num; j++) {
+                    rowArr.push(new Cell(i, j));
+                }
+                kenArr.push(rowArr);
+            }
+            return kenArr;
+        }
+
+        function fillKen(kenArr) {
+            const length = kenArr.length;
+            for(let i = 1; i <= length; i++) {
+                console.log("attempt", i);
+                
+                for(let j = 0; j < length; j++) {
+                    let emptyCellInRow = kenArr[j].filter(function(cell) {
+                        return !cell.fill;
+                    })
+                    let restCellForFill = emptyCellInRow.filter(function(el) {
+                        let result = true;
+                        for(let z = 0; z < j; z++) {
+                            if(kenArr[z][el.col].num === i) result = false;
+                        }
+                        return result;
+                    })
+                    /*console.log('string #', j);
+                    emptyCellInRow.forEach(el => {
+                        console.log(el.col);
+                    });
+                    console.log('rest #', j)
+                    restCellForFill.forEach(el => {
+                        console.log(el.col);
+                    });*/
+                    //console.log(j, restCellForFill);
+                    let col = Math.round(Math.random() * (restCellForFill.length - 1));
+                    let currentCell = restCellForFill[col];
+                    currentCell.fillNum(i);
+                    console.log(currentCell.row, currentCell.col, currentCell.num);
+                }
+
+            }
+        }
+
+        
+
+
+        
+
+        drawTable(kenArr);
+
+        function drawTable(arrObj) {
+            const $table = document.querySelector('table');
+            let inner = '';
+            for(let i = 0; i < arrObj.length; i++) {
+                let row = '<tr>';
+                    for(let j = 0; j < arrObj[i].length; j++) {
+                        row += `<td class = 'cell'>${arrObj[i][j].num}</td>`;
+                    }
+                row += '</tr>';    
+                inner += row;
+            }
+
+            $table.innerHTML = inner;
+        }
+
+
+
+        //let cell = new Cell(5);
+       // cell.sayNum();
+
+
+        /*for(let i = 0; i < num; i++) {
+            let cell = new Cell(Math.round(Math.random() * (num - 1) + 1));
+            arr.push(cell);
+        }*/
+
+        
+
+
+
+        
+       /* const arr = createArr(num);
+        drawTable(arr);
+
+        console.log(arr);
+
+
+        function createArr(num) {
+            let arr = [];
+            for(let i = 0; i < num; i++) {
+                let row = [];
+                for(let j = 0; j < num; j++) {
+                    let col = [];
+                    for(let z = 0; z < i; z++) {
+                        col.push(arr[z][j]);
+                    }
+                    console.log('col : ' , i, j, col);
+                    console.log('row : ' , i, j, row);
+                    console.log(arr);
+
+                    let rand;
+                    do {
+                        rand = Math.round(Math.random() * (num - 1) + 1);
+                        console.log(i, j , '*', rand);
+                    } while (isNumInArray(rand, row)|| isNumInArray(rand, col)); //;
+
+                    row.push(rand);
+                }
+                arr.push(row);
+            }
+            return arr;
+        }
+
+        function isNumInArray(num, array) {
+            let result = false;
+            for(let i = 0; i < array.length; i++){
+                if (num === array[i]) result = true;
+            }
+            return result;
+        }
+        function drawTable(arr) {
+            const $table = document.querySelector('table');
+            let inner = '';
+            for(let i = 0; i < arr.length; i++) {
+                let row = '<tr>';
+                    for(let j = 0; j < arr[i].length; j++) {
+                        row += `<td class = 'cell'>${arr[i][j]}</td>`;
+                    }
+                row += '</tr>';    
+                inner += row;
+            }
+
+            $table.innerHTML = inner;
+        }
+
+        */
+
+        
+
+    </script>
+
+    
+</body>
+</html>
