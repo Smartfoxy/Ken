@@ -41,7 +41,9 @@
     <script>
         "use strict"
 
-        const num = 4;
+        let repeate = 0;
+
+        const num = 9;
         //let arr = new Array(num);
 
         class Cell {
@@ -90,6 +92,22 @@
                         }
                         return result;
                     })
+                    console.log('строка ', j, 'length : ', restCellForFill.length);
+                    if(!restCellForFill.length) {
+                        console.log('пусто');
+                        repeate++;
+                        for(let z = 0; z < j; z++) {
+                            kenArr[z].forEach(el => {
+                                if(el.num === i) {
+                                    el.num = null;
+                                    el.fill = false;
+                                }
+                            });
+                        }
+
+                        j = -1;
+                        continue;
+                    }   
                     /*console.log('string #', j);
                     emptyCellInRow.forEach(el => {
                         console.log(el.col);
@@ -102,7 +120,15 @@
                     let col = Math.round(Math.random() * (restCellForFill.length - 1));
                     let currentCell = restCellForFill[col];
                     currentCell.fillNum(i);
-                    console.log(currentCell.row, currentCell.col, currentCell.num);
+                    for(let i = 0; i < length; i++) {
+                        let result = '';
+                        for(let j = 0; j < length; j++){
+                            let cur = kenArr[i][j].num ? kenArr[i][j].num : 0;
+                            result += cur + " ";
+                        }
+                        console.log(result); 
+                    }
+                    //console.log(currentCell.row, currentCell.col, currentCell.num);
                 }
 
             }
@@ -114,6 +140,8 @@
         
 
         drawTable(kenArr);
+
+        console.log(repeate);
 
         function drawTable(arrObj) {
             const $table = document.querySelector('table');
