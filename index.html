@@ -28,6 +28,21 @@
         table {
             border-collapse: collapse;
         }
+        ._0 {
+            background-color: red;
+        }
+        ._1 {
+            background-color: yellow;
+        }
+        ._2 {
+            background-color: green;
+        }
+        ._3 {
+            background-color: blue;
+        }
+        ._4 {
+            background-color: orange;
+        }
     </style>
 </head>
 <body>
@@ -41,11 +56,8 @@
     <script>
         "use strict"
 
-        let repeate = 0;
-
-        const num = 9;
-        //let arr = new Array(num);
-
+        
+        
         class Cell {
             constructor(row, col) {
                 this.row = row;
@@ -58,11 +70,83 @@
             }
         }
 
+        let repeate = 0; 
+
+        const num = 5;
         let kenArr = createKen(num);
         fillKen(kenArr);
 
         console.log(kenArr);
+        
+        drawTable(kenArr);
 
+        //console.log(repeate);
+
+        const $table = document.querySelector('table');
+        //console.log($table);
+        unionCells($table, kenArr);
+
+
+
+
+
+
+        function unionCells($table, arrOfCells) {
+            for(let i = 0 ; i < 1/*$table.length*/; i++) {
+                for(let j = 0; j < 5/*$table.rows[i].length*/; j++) {
+                    console.log('J: ', j);
+                    let x = i;
+                    let y = j;
+                    if($table.rows[x].cells[y].classList.contains('union')){
+                        continue;
+                    }
+                    for(let z = 0; z < 3/*random*/;z++) {
+                        
+
+                        if(z !== 0) {
+                            let direction = isOnRight();
+                            const nextCell = $table.rows[x + !direction].cells[y + direction];
+                            if(!nextCell || nextCell.classList.contains('union')){
+                                direction = !direction;
+                            }
+                            x += !direction;
+                            y += direction; 
+                        }
+
+
+                        $table.rows[x].cells[y].className = `union _${j}`;
+
+                        console.log('X: ' + x, 'Y: ' + y, $table.rows[x].cells[y].className);
+
+                        if(!isNeighborCellExist($table, x, y) || !isNeighborCellNotUnion($table, x, y)) {
+                            console.log('break');
+                            break;
+                        }
+
+                    }
+                   
+                }
+            }
+        }
+        function isOnRight() {
+            let y = Math.round(Math.random());
+            console.log(y);
+            return y; //Math.round(Math.random());
+        }
+        function isCellExist($table, x, y) {
+            return $table.rows[x].cells[y];
+        }
+        function isNeighborCellExist($table, x, y) {
+            return isCellExist($table, x + 1, y) ||/* isCellExist($table, x - 1, y) ||*/ isCellExist($table, x, y + 1)/* || isCellExist($table, x, y - 1)*/;
+        }
+        function isCellNotUnion($table, x, y) {
+            return !$table.rows[x].cells[y].classList.contains('union');
+        }
+        function isNeighborCellNotUnion($table, x, y) {
+            return isCellNotUnion($table, x + 1, y) ||/* isCellNotUnion($table, x - 1, y) ||*/ isCellNotUnion($table, x, y + 1)/* || isCellNotUnion($table, x, y - 1)*/;
+        }
+
+       
 
         function createKen(num) {
             let kenArr = [];
@@ -139,9 +223,7 @@
 
         
 
-        drawTable(kenArr);
-
-        console.log(repeate);
+        
 
         function drawTable(arrObj) {
             const $table = document.querySelector('table');
