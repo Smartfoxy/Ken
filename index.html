@@ -43,6 +43,45 @@
         ._4 {
             background-color: orange;
         }
+        ._5 {
+            background-color: lawngreen;
+        }
+        ._6 {
+            background-color: lightcoral;
+        }
+        ._7 {
+            background-color: rebeccapurple;
+        }
+        ._8 {
+            background-color: tan;
+        }
+        ._9 {
+            background-color: lightgray;
+        }
+        ._10 {
+            background-color: brown;
+        }
+        ._11 {
+            background-color: fuchsia;
+        }
+        ._12 {
+            background-color: darkcyan;
+        }
+        ._13 {
+            background-color: red;
+        }
+        ._14 {
+            background-color: yellowgreen;
+        }
+        ._15 {
+            background-color: aqua;
+        }
+        .bottom {
+            border-bottom: 3px solid;
+        }
+        .right {
+            border-right: 3px solid;    
+        }
     </style>
 </head>
 <body>
@@ -56,7 +95,19 @@
     <script>
         "use strict"
 
-        
+        const test = [2, 7, 13, 5, 10];
+
+        for(let i = 0; i < test.length - 1; i++) {
+            for(let j = i + 1; j < test.length; j++){
+                
+                if(test[j] < test[i]){
+                    let buf = test[i];
+                    test[i] = test[j];
+                    test[j] = buf;
+                }
+            }
+        }
+        console.log(test);
         
         class Cell {
             constructor(row, col) {
@@ -72,7 +123,9 @@
 
         let repeate = 0; 
 
-        const num = 5;
+        const num = 7;
+        const maxCellsInUnion = 4;
+        let color = 0;
         let kenArr = createKen(num);
         fillKen(kenArr);
 
@@ -83,8 +136,14 @@
         //console.log(repeate);
 
         const $table = document.querySelector('table');
-        //console.log($table);
+        console.log($table);
         unionCells($table, kenArr);
+
+        for(let i = 0; i < num * num; i++) { //num*num нужно на чтото заменить??
+            let className = `_${i}`;
+            console.log(className);
+            drawBordersOfUnion(className);
+        }
 
 
 
@@ -92,59 +151,165 @@
 
 
         function unionCells($table, arrOfCells) {
-            for(let i = 0 ; i < 1/*$table.length*/; i++) {
-                for(let j = 0; j < 5/*$table.rows[i].length*/; j++) {
+            for(let i = 0 ; i < num; i++) {
+                for(let j = 0; j < num; j++) {
                     console.log('J: ', j);
                     let x = i;
                     let y = j;
                     if($table.rows[x].cells[y].classList.contains('union')){
                         continue;
                     }
-                    for(let z = 0; z < 3/*random*/;z++) {
+                    const countOfUnion = Math.round(Math.random() * (4 - 2) + 2); //2/3/4 сделать пропорцию 2/2/1
+                    console.log('count: ', countOfUnion);
+                    for(let z = 0; z < countOfUnion; z++) {
                         
 
                         if(z !== 0) {
-                            let direction = isOnRight();
-                            const nextCell = $table.rows[x + !direction].cells[y + direction];
-                            if(!nextCell || nextCell.classList.contains('union')){
-                                direction = !direction;
-                            }
-                            x += !direction;
-                            y += direction; 
+                            let x1;
+                            let y1;
+                            let freeDirections = [1, 2, 3, 4];
+                            let dir;
+                            let att = 1;
+                            do {
+                                //let [x1, y1] = getNextCellcoordinates(x, y); что не так?
+                                let arr = getNextCellcoordinates(x, y, freeDirections);
+                                x1 = arr[0];
+                                y1 = arr[1];
+                                dir = arr[2];
+                                console.log(dir);
+                                freeDirections = freeDirections.filter(el => {
+                                    console.log(el);
+                                    return (el !== dir);
+                                });
+
+
+                                console.log('attempt:', att , ', X: ',x, 'Y; ', y, 'X1: ',x1, 'Y1: ', y1, freeDirections);
+                                console.log(!isCellExistAndFree($table, x1, y1));
+                                att++;
+                            } while (!isCellExistAndFree($table, x1, y1));
+                             //destraction!!!!
+                            x = x1;
+                            y = y1;
                         }
 
 
-                        $table.rows[x].cells[y].className = `union _${j}`;
+                        $table.rows[x].cells[y].className = `union _${color}`;
+                        
 
                         console.log('X: ' + x, 'Y: ' + y, $table.rows[x].cells[y].className);
 
-                        if(!isNeighborCellExist($table, x, y) || !isNeighborCellNotUnion($table, x, y)) {
+                        if(!isFreeNeighborCellExist($table, x, y)) {
                             console.log('break');
                             break;
                         }
 
                     }
-                   
+                    color++;
                 }
             }
         }
-        function isOnRight() {
+
+        function getNextCellcoordinates(x, y, freeDirections) {
+            for(let i =0; i < freeDirections.length; i++) {
+                console.log('dir:', freeDirections[i]);
+            }
+            let arrCoordinates = [];
+            const index =  Math.round(Math.random() * (freeDirections.length - 1));
+            const direction = freeDirections[index];
+            switch (direction) {
+                case 1 :
+                    y++;
+                    break;
+                case 2 :
+                    x++;
+                    break;
+                case 3 :
+                    y--;
+                    break;
+                case 4 : 
+                    x--;
+                    break;
+                default:
+                    alert('упс!') //нужно ли здесь дефолт обязательно?
+            }
+            arrCoordinates[0] = x;
+            arrCoordinates[1] = y;
+            arrCoordinates[2] = direction;
+            return arrCoordinates;
+        }
+
+        function drawBordersOfUnion(className) {
+            let union = document.querySelectorAll(`.${className}`);
+            union = Array.prototype.slice.call(union);
+            
+            let arrOfRows = [];
+            for(let i = 0; i < union.length; i++) {
+                let currentRow = union[i].parentElement.sectionRowIndex;
+                if(!arrOfRows.find(el => {
+                    return el === currentRow;
+                })) {
+                    arrOfRows.push(currentRow);
+                }
+            }
+            console.log(arrOfRows);
+
+            for(let row = arrOfRows[0]; row <= arrOfRows[arrOfRows.length-1]; row++) {
+                let currentRow = union.filter(el => {
+                    return el.parentElement.sectionRowIndex === row;
+                })
+                console.log(currentRow);
+
+                for(let i = 0; i < currentRow.length - 1; i++) {
+                    for(let j = i + 1; j < currentRow.length; j++){
+                        if(currentRow[i].cellIndex > currentRow[j].cellIndex) {
+                            let buf = currentRow[i];
+                            currentRow[i] = currentRow[j];
+                            currentRow[j] = buf;
+                        }
+                    }
+                }
+
+                currentRow[currentRow.length - 1].classList.add('right'); 
+                
+            }
+            
+            
+            
+           /* for(let i = 0; i < union.length; i++) {
+                if(union[i].cellIndex === maxY) {
+                   union[i].classList.add('right');
+                }    
+               //console.log(union[i].cellIndex);
+            }*/
+
+
+            
+            //sectionRowIndex parentElement
+                      
+        }
+
+
+        /*function isOnRight() {
             let y = Math.round(Math.random());
-            console.log(y);
+            //console.log(y);
             return y; //Math.round(Math.random());
-        }
+        }*/
         function isCellExist($table, x, y) {
-            return $table.rows[x].cells[y];
+            return $table.rows[x] && $table.rows[x].cells[y];
         }
-        function isNeighborCellExist($table, x, y) {
-            return isCellExist($table, x + 1, y) ||/* isCellExist($table, x - 1, y) ||*/ isCellExist($table, x, y + 1)/* || isCellExist($table, x, y - 1)*/;
-        }
-        function isCellNotUnion($table, x, y) {
+        function isCellFree($table, x, y) {
             return !$table.rows[x].cells[y].classList.contains('union');
         }
-        function isNeighborCellNotUnion($table, x, y) {
-            return isCellNotUnion($table, x + 1, y) ||/* isCellNotUnion($table, x - 1, y) ||*/ isCellNotUnion($table, x, y + 1)/* || isCellNotUnion($table, x, y - 1)*/;
+        function isCellExistAndFree($table, x, y) {
+            return isCellExist($table, x, y) && isCellFree($table, x, y);
         }
+        function isFreeNeighborCellExist($table, x, y) {
+            return isCellExistAndFree($table, x + 1, y) || isCellExistAndFree($table, x - 1, y) || isCellExistAndFree($table, x, y + 1) || isCellExistAndFree($table, x, y - 1);
+        }
+
+        
+        
+        
 
        
 
@@ -163,7 +328,7 @@
         function fillKen(kenArr) {
             const length = kenArr.length;
             for(let i = 1; i <= length; i++) {
-                console.log("attempt", i);
+                //console.log("attempt", i);
                 
                 for(let j = 0; j < length; j++) {
                     let emptyCellInRow = kenArr[j].filter(function(cell) {
@@ -176,9 +341,9 @@
                         }
                         return result;
                     })
-                    console.log('строка ', j, 'length : ', restCellForFill.length);
+                    //console.log('строка ', j, 'length : ', restCellForFill.length);
                     if(!restCellForFill.length) {
-                        console.log('пусто');
+                       //console.log('пусто');
                         repeate++;
                         for(let z = 0; z < j; z++) {
                             kenArr[z].forEach(el => {
@@ -200,7 +365,7 @@
                     restCellForFill.forEach(el => {
                         console.log(el.col);
                     });*/
-                    //console.log(j, restCellForFill);
+                    console.log(j, restCellForFill);
                     let col = Math.round(Math.random() * (restCellForFill.length - 1));
                     let currentCell = restCellForFill[col];
                     currentCell.fillNum(i);
