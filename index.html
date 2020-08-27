@@ -76,6 +76,33 @@
         ._15 {
             background-color: aqua;
         }
+        ._16 {
+            background-color: yellow;
+        }
+        ._17 {
+            background-color: green;
+        }
+        ._18 {
+            background-color: blue;
+        }
+        ._19 {
+            background-color: orange;
+        }
+        ._20 {
+            background-color: lawngreen;
+        }
+        ._21 {
+            background-color: lightcoral;
+        }
+        ._22 {
+            background-color: rebeccapurple;
+        }
+        ._23 {
+            background-color: tan;
+        }
+        ._24 {
+            background-color: lightgray;
+        }
         .bottom {
             border-bottom: 3px solid;
         }
@@ -94,77 +121,79 @@
 
     <script>
         "use strict"
-
-        const test = [2, 7, 13, 5, 10];
-
-        for(let i = 0; i < test.length - 1; i++) {
-            for(let j = i + 1; j < test.length; j++){
-                
-                if(test[j] < test[i]){
-                    let buf = test[i];
-                    test[i] = test[j];
-                    test[j] = buf;
-                }
-            }
-        }
-        console.log(test);
         
         class Cell {
             constructor(row, col) {
                 this.row = row;
                 this.col = col;
                 this.fill = false;
+                this.union = false;
             }
             fillNum(num) {
                 this.num = num;
                 this.fill = true;
             }
+            unionCells(unionIndex) {
+                this.unionIndex = unionIndex;
+                this.union = true;
+            }
+            addBorder(type) {
+                this.border = type;
+            }
+        }
+
+        class Union {
+            constructor(index) {
+                this.index = index;
+                this.cellsInUnion = [];
+            }
+            addCellToUnion(cell) {
+                this.cellsInUnion.push(cell);
+            }
         }
 
         let repeate = 0; 
+        const num = 9;
+        //const maxCellsInUnion = 4;
+        let indexOfUnion = 0;
+        let arrOfUnions = [];
 
-        const num = 7;
-        const maxCellsInUnion = 4;
-        let color = 0;
+      
+
         let kenArr = createKen(num);
         fillKen(kenArr);
 
         console.log(kenArr);
+
+        unionCells(kenArr);
+
         
-        drawTable(kenArr);
+        console.log(arrOfUnions);
 
-        //console.log(repeate);
-
-        const $table = document.querySelector('table');
-        console.log($table);
-        unionCells($table, kenArr);
-
-        for(let i = 0; i < num * num; i++) { //num*num нужно на чтото заменить??
-            let className = `_${i}`;
-            console.log(className);
-            drawBordersOfUnion(className);
+        for(let i = 0; i < indexOfUnion/*num * num*/; i++) { //num*num нужно на чтото заменить??
+            
+            console.log(i, ': ');
+            drawBordersOfUnion(arrOfUnions[i]);
         }
 
+        drawTable(kenArr);
 
 
-
-
-
-        function unionCells($table, arrOfCells) {
-            for(let i = 0 ; i < num; i++) {
-                for(let j = 0; j < num; j++) {
-                    console.log('J: ', j);
+        function unionCells(arrOfCells) {
+            for(let i = 0; i < arrOfCells.length; i++) {
+                for(let j = 0; j < arrOfCells[i].length; j++) {
                     let x = i;
                     let y = j;
-                    if($table.rows[x].cells[y].classList.contains('union')){
+                    if(arrOfCells[x][y].union){
                         continue;
                     }
-                    const countOfUnion = Math.round(Math.random() * (4 - 2) + 2); //2/3/4 сделать пропорцию 2/2/1
-                    console.log('count: ', countOfUnion);
+                    const countOfUnion = Math.round(Math.random() * (4 - 2) + 2); //2/3/4 сделать пропорцию 2/2/1 или считать кол-во 4
+                    
+                    console.log('count of union', countOfUnion);
+                    let currentUnion = new Union(indexOfUnion);
                     for(let z = 0; z < countOfUnion; z++) {
-                        
 
-                        if(z !== 0) {
+                       if(z !== 0) {
                             let x1;
                             let y1;
                             let freeDirections = [1, 2, 3, 4];
@@ -176,43 +205,47 @@
                                 x1 = arr[0];
                                 y1 = arr[1];
                                 dir = arr[2];
-                                console.log(dir);
+                                console.log('direction^ ', dir);
                                 freeDirections = freeDirections.filter(el => {
-                                    console.log(el);
+                                    //console.log(el);
                                     return (el !== dir);
                                 });
 
 
                                 console.log('attempt:', att , ', X: ',x, 'Y; ', y, 'X1: ',x1, 'Y1: ', y1, freeDirections);
-                                console.log(!isCellExistAndFree($table, x1, y1));
+                                //console.log(!isCellExistAndFree($table, x1, y1));
                                 att++;
-                            } while (!isCellExistAndFree($table, x1, y1));
+                            } while (!isCellExistAndFree(arrOfCells, x1, y1));
                              //destraction!!!!
                             x = x1;
                             y = y1;
                         }
 
+                        console.log(indexOfUnion);
 
-                        $table.rows[x].cells[y].className = `union _${color}`;
+                        arrOfCells[x][y].unionCells(indexOfUnion);
+                        currentUnion.addCellToUnion(arrOfCells[x][y]);
+                        
                         
 
-                        console.log('X: ' + x, 'Y: ' + y, $table.rows[x].cells[y].className);
+                        //console.log('X: ' + x, 'Y: ' + y, $table.rows[x].cells[y].className);
 
-                        if(!isFreeNeighborCellExist($table, x, y)) {
+                        if(!isFreeNeighborCellExist(arrOfCells, x, y)) {
                             console.log('break');
                             break;
                         }
 
                     }
-                    color++;
+                    arrOfUnions.push(currentUnion);
+                    indexOfUnion++;
                 }
             }
         }
 
         function getNextCellcoordinates(x, y, freeDirections) {
-            for(let i =0; i < freeDirections.length; i++) {
+            /*for(let i =0; i < freeDirections.length; i++) {
                 console.log('dir:', freeDirections[i]);
-            }
+            }*/
             let arrCoordinates = [];
             const index =  Math.round(Math.random() * (freeDirections.length - 1));
             const direction = freeDirections[index];
@@ -238,30 +271,25 @@
             return arrCoordinates;
         }
 
-        function drawBordersOfUnion(className) {
-            let union = document.querySelectorAll(`.${className}`);
-            union = Array.prototype.slice.call(union);
+        function drawBordersOfUnion(union) {
+            const cells = union.cellsInUnion;
             
             let arrOfRows = [];
-            for(let i = 0; i < union.length; i++) {
-                let currentRow = union[i].parentElement.sectionRowIndex;
-                if(!arrOfRows.find(el => {
-                    return el === currentRow;
-                })) {
-                    arrOfRows.push(currentRow);
-                }
+            for(let i = 0; i < cells.length; i++) {
+                arrOfRows.push(cells[i].row);
             }
+            arrOfRows.sort();
             console.log(arrOfRows);
 
             for(let row = arrOfRows[0]; row <= arrOfRows[arrOfRows.length-1]; row++) {
-                let currentRow = union.filter(el => {
-                    return el.parentElement.sectionRowIndex === row;
+                let currentRow = cells.filter(el => {
+                    return el.row === row;
                 })
-                console.log(currentRow);
+                console.log('row #', row, ': ', currentRow);
 
                 for(let i = 0; i < currentRow.length - 1; i++) {
                     for(let j = i + 1; j < currentRow.length; j++){
-                        if(currentRow[i].cellIndex > currentRow[j].cellIndex) {
+                        if(currentRow[i].col > currentRow[j].col) {
                             let buf = currentRow[i];
                             currentRow[i] = currentRow[j];
                             currentRow[j] = buf;
@@ -269,47 +297,47 @@
                     }
                 }
 
-                currentRow[currentRow.length - 1].classList.add('right'); 
-                
-            }
-            
-            
-            
-           /* for(let i = 0; i < union.length; i++) {
-                if(union[i].cellIndex === maxY) {
-                   union[i].classList.add('right');
-                }    
-               //console.log(union[i].cellIndex);
+                currentRow[currentRow.length - 1].addBorder('right');
+
+                // 
+
+                /*for(let i = 0; i < cells.length; i++) {
+                let currentRow = cells[i].row;
+                if(!arrOfRows.find(el => {
+                    return el === currentRow;
+                })) {
+                    arrOfRows.push(currentRow);
+                }
             }*/
-
-
-            
-            //sectionRowIndex parentElement
-                      
+            }
         }
 
 
-        /*function isOnRight() {
-            let y = Math.round(Math.random());
-            //console.log(y);
-            return y; //Math.round(Math.random());
-        }*/
-        function isCellExist($table, x, y) {
-            return $table.rows[x] && $table.rows[x].cells[y];
+        function isCellExist(arrOfCells, x, y) {
+            return (x >= 0 && x < arrOfCells.length) && (y >= 0 && y < arrOfCells.length);
         }
-        function isCellFree($table, x, y) {
-            return !$table.rows[x].cells[y].classList.contains('union');
+        function isCellFree(arrOfCells, x, y) {
+            return !arrOfCells[x][y].union;
         }
-        function isCellExistAndFree($table, x, y) {
-            return isCellExist($table, x, y) && isCellFree($table, x, y);
+        function isCellExistAndFree(arrOfCells, x, y) {
+            return isCellExist(arrOfCells, x, y) && isCellFree(arrOfCells, x, y);
         }
-        function isFreeNeighborCellExist($table, x, y) {
-            return isCellExistAndFree($table, x + 1, y) || isCellExistAndFree($table, x - 1, y) || isCellExistAndFree($table, x, y + 1) || isCellExistAndFree($table, x, y - 1);
+        function isFreeNeighborCellExist(arrOfCells, x, y) {
+            return isCellExistAndFree(arrOfCells, x + 1, y) || isCellExistAndFree(arrOfCells, x - 1, y) || isCellExistAndFree(arrOfCells, x, y + 1) || isCellExistAndFree(arrOfCells, x, y - 1);
         }
-
         
         
+
         
+
+       /* const $table = document.querySelector('table');
+        
+        unionCells($table, kenArr);
+
+        */
+
+
+
 
        
 
@@ -328,7 +356,6 @@
         function fillKen(kenArr) {
             const length = kenArr.length;
             for(let i = 1; i <= length; i++) {
-                //console.log("attempt", i);
                 
                 for(let j = 0; j < length; j++) {
                     let emptyCellInRow = kenArr[j].filter(function(cell) {
@@ -341,9 +368,8 @@
                         }
                         return result;
                     })
-                    //console.log('строка ', j, 'length : ', restCellForFill.length);
+                   
                     if(!restCellForFill.length) {
-                       //console.log('пусто');
                         repeate++;
                         for(let z = 0; z < j; z++) {
                             kenArr[z].forEach(el => {
@@ -357,15 +383,8 @@
                         j = -1;
                         continue;
                     }   
-                    /*console.log('string #', j);
-                    emptyCellInRow.forEach(el => {
-                        console.log(el.col);
-                    });
-                    console.log('rest #', j)
-                    restCellForFill.forEach(el => {
-                        console.log(el.col);
-                    });*/
-                    console.log(j, restCellForFill);
+                    
+                    //console.log(j, restCellForFill);
                     let col = Math.round(Math.random() * (restCellForFill.length - 1));
                     let currentCell = restCellForFill[col];
                     currentCell.fillNum(i);
@@ -375,20 +394,13 @@
                             let cur = kenArr[i][j].num ? kenArr[i][j].num : 0;
                             result += cur + " ";
                         }
-                        console.log(result); 
+                        //console.log(result); 
                     }
-                    //console.log(currentCell.row, currentCell.col, currentCell.num);
+                    
                 }
 
             }
         }
-
-        
-
-
-        
-
-        
 
         function drawTable(arrObj) {
             const $table = document.querySelector('table');
@@ -396,7 +408,10 @@
             for(let i = 0; i < arrObj.length; i++) {
                 let row = '<tr>';
                     for(let j = 0; j < arrObj[i].length; j++) {
-                        row += `<td class = 'cell'>${arrObj[i][j].num}</td>`;
+                        const border = arrObj[i][j].border ? arrObj[i][j].border : '';
+                            row += `<td class = 'cell _${arrObj[i][j].unionIndex} ${border}'>${arrObj[i][j].num}</td>`;
+                        
+                        
                     }
                 row += '</tr>';    
                 inner += row;
@@ -405,80 +420,27 @@
             $table.innerHTML = inner;
         }
 
-
-
-        //let cell = new Cell(5);
-       // cell.sayNum();
-
-
-        /*for(let i = 0; i < num; i++) {
-            let cell = new Cell(Math.round(Math.random() * (num - 1) + 1));
-            arr.push(cell);
+         /* let maxOfFour = 1;
+        switch(num) {
+            case 6 :
+                maxOfFour = 2;
+                break;
+            case 7 :
+                maxOfFour = 3;
+                break;
+            case 8 :
+                maxOfFour = 3;
+                break;
+            case 9 : 
+                maxOfFour = 4;
+                break;
+            default:
+                alert('упсcccc!')
         }*/
 
         
 
-
-
-        
-       /* const arr = createArr(num);
-        drawTable(arr);
-
-        console.log(arr);
-
-
-        function createArr(num) {
-            let arr = [];
-            for(let i = 0; i < num; i++) {
-                let row = [];
-                for(let j = 0; j < num; j++) {
-                    let col = [];
-                    for(let z = 0; z < i; z++) {
-                        col.push(arr[z][j]);
-                    }
-                    console.log('col : ' , i, j, col);
-                    console.log('row : ' , i, j, row);
-                    console.log(arr);
-
-                    let rand;
-                    do {
-                        rand = Math.round(Math.random() * (num - 1) + 1);
-                        console.log(i, j , '*', rand);
-                    } while (isNumInArray(rand, row)|| isNumInArray(rand, col)); //;
-
-                    row.push(rand);
-                }
-                arr.push(row);
-            }
-            return arr;
-        }
-
-        function isNumInArray(num, array) {
-            let result = false;
-            for(let i = 0; i < array.length; i++){
-                if (num === array[i]) result = true;
-            }
-            return result;
-        }
-        function drawTable(arr) {
-            const $table = document.querySelector('table');
-            let inner = '';
-            for(let i = 0; i < arr.length; i++) {
-                let row = '<tr>';
-                    for(let j = 0; j < arr[i].length; j++) {
-                        row += `<td class = 'cell'>${arr[i][j]}</td>`;
-                    }
-                row += '</tr>';    
-                inner += row;
-            }
-
-            $table.innerHTML = inner;
-        }
-
-        */
-
-        
-
+       
     </script>
 
     
