@@ -17,16 +17,28 @@
         .table {
             border: 1px solid blue;
             padding: 15px;
+            font-size: 20px;
         }
-        td {
-            border: 1px solid blue;
+        .cell {
+            border: 1px solid black;
             padding: 5px;
-            height: 20px;
-            width: 20px;
+            height: 30px;
+            width: 30px;
             text-align: center;
+            position: relative;
+            color: blue;
+        }
+        .cell::after {
+            content: attr(data-oper);
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: black;
+            font-size: 14px;
         }
         table {
             border-collapse: collapse;
+            border: 3px solid black;
         }
         ._0 {
             background-color: red;
@@ -104,11 +116,12 @@
             background-color: lightgray;
         }
         .bottom {
-            border-bottom: 3px solid;
+            border-bottom: 3px solid black;
         }
         .right {
-            border-right: 3px solid;    
+            border-right: 3px solid black;    
         }
+        
     </style>
 </head>
 <body>
@@ -128,6 +141,7 @@
                 this.col = col;
                 this.fill = false;
                 this.union = false;
+                this.border = '';
             }
             fillNum(num) {
                 this.num = num;
@@ -138,7 +152,10 @@
                 this.union = true;
             }
             addBorder(type) {
-                this.border = type;
+                this.border += type + ' ';
+            }
+            addOperatorAttr(oper) {
+                this.operAttr = oper;
             }
         }
 
@@ -149,6 +166,12 @@
             }
             addCellToUnion(cell) {
                 this.cellsInUnion.push(cell);
+            }
+            setSortRowsNumbers(rows) {
+                this.sortRowsNums = rows;
+            }
+            setOperator(oper) {
+                this.oper = oper;
             }
         }
 
@@ -170,11 +193,12 @@
         
         console.log(arrOfUnions);
 
-        for(let i = 0; i < indexOfUnion/*num * num*/; i++) { //num*num нужно на чтото заменить??
-            
-            console.log(i, ': ');
-            drawBordersOfUnion(arrOfUnions[i]);
-        }
+        arrOfUnions.forEach(union => {
+            drawBordersOfUnion(union);
+            selectOperator(union);
+            selectCellinUnionForOperAttr(union);
+        })
+
 
         drawTable(kenArr);
 
@@ -226,9 +250,6 @@
                         arrOfCells[x][y].unionCells(indexOfUnion);
                         currentUnion.addCellToUnion(arrOfCells[x][y]);
                         
-                        
-
-                        //console.log('X: ' + x, 'Y: ' + y, $table.rows[x].cells[y].className);
 
                         if(!isFreeNeighborCellExist(arrOfCells, x, y)) {
                             console.log('break');
@@ -274,42 +295,92 @@
         function drawBordersOfUnion(union) {
             const cells = union.cellsInUnion;
             
-            let arrOfRows = [];
+            let arrOfRowsNum = [];
+
             for(let i = 0; i < cells.length; i++) {
-                arrOfRows.push(cells[i].row);
-            }
-            arrOfRows.sort();
-            console.log(arrOfRows);
-
-            for(let row = arrOfRows[0]; row <= arrOfRows[arrOfRows.length-1]; row++) {
-                let currentRow = cells.filter(el => {
-                    return el.row === row;
-                })
-                console.log('row #', row, ': ', currentRow);
-
-                for(let i = 0; i < currentRow.length - 1; i++) {
-                    for(let j = i + 1; j < currentRow.length; j++){
-                        if(currentRow[i].col > currentRow[j].col) {
-                            let buf = currentRow[i];
-                            currentRow[i] = currentRow[j];
-                            currentRow[j] = buf;
-                        }
-                    }
+                if(arrOfRowsNum.indexOf(cells[i].row) === -1) {
+                    arrOfRowsNum.push(cells[i].row);
                 }
-
-                currentRow[currentRow.length - 1].addBorder('right');
-
-                // 
-
-                /*for(let i = 0; i < cells.length; i++) {
-                let currentRow = cells[i].row;
-                if(!arrOfRows.find(el => {
-                    return el === currentRow;
-                })) {
-                    arrOfRows.push(currentRow);
-                }
-            }*/
             }
+
+            union.setSortRowsNumbers(arrOfRowsNum.sort());
+            //console.log('arrrrr: ' , arrOfRowsNum);
+
+            arrOfRowsNum.forEach(rowNum => {
+                let currentRowCells = cells.filter(el => {
+                    return el.row === rowNum;
+                }).sort(compareCellsByCol);
+
+                currentRowCells[currentRowCells.length-1].addBorder('right');
+            })
+
+            let arrOfColsNum = [];
+            for(let i = 0; i < cells.length; i++) {
+                if(arrOfColsNum.indexOf(cells[i].col) === -1) {
+                    arrOfColsNum.push(cells[i].col);
+                }
+            }
+           
+            //console.log('arrrrr COL: ' , arrOfColsNum);
+
+            arrOfColsNum.forEach(colNum => {
+                let currentColCells = cells.filter(el => {
+                    return el.col === colNum;
+                }).sort(compareCellsByRow);
+
+                currentColCells[currentColCells.length-1].addBorder('bottom');
+            })
+
+        }
+
+        function selectOperator(union) {
+            let operatorAndResult = '';
+            let result = 0;
+            if(union.cellsInUnion.length === 1) {
+                operatorAndResult = union.cellsInUnion[0].num;
+            }else if(union.cellsInUnion.length === 2){
+                let operator = Math.round(Math.random() * (2 - 1) + 1);
+                switch(operator) {
+                    case 1 :
+                        operator = '+';
+                        result = union.cellsInUnion.reduce(function(acc, current){
+                            return acc + current.num; 
+                        }, 0);
+                        break;
+                    case 2 :
+                        operator = 'x';
+                        result = union.cellsInUnion.reduce(function(acc, current){
+                            return acc * current.num; 
+                        }, 1);
+                        break;
+                   /* case 3 :
+                        maxOfFour = 3;
+                        break;
+                    case 4 : 
+                        maxOfFour = 4;
+                        break;*/
+                    default:
+                        alert('упсcccc!')
+                }
+                operatorAndResult = operatorAndResult + result + operator;
+            }
+            union.setOperator(operatorAndResult);
+        }
+
+        function selectCellinUnionForOperAttr(union) { 
+            let cellsInTopRowSort = union.cellsInUnion.filter(cell => {
+                return cell.row === union.sortRowsNums[0];
+            }).sort(compareCellsByCol);
+            cellsInTopRowSort[0].addOperatorAttr(union.oper);
+        }
+        
+        function compareCellsByRow(cell1, cell2) {
+            return cell1.row - cell2.row;
+
+        }
+        function compareCellsByCol(cell1, cell2) {
+            return cell1.col - cell2.col;
+
         }
 
 
@@ -326,19 +397,6 @@
             return isCellExistAndFree(arrOfCells, x + 1, y) || isCellExistAndFree(arrOfCells, x - 1, y) || isCellExistAndFree(arrOfCells, x, y + 1) || isCellExistAndFree(arrOfCells, x, y - 1);
         }
         
-        
-
-        
-
-       /* const $table = document.querySelector('table');
-        
-        unionCells($table, kenArr);
-
-        */
-
-
-
-
        
 
         function createKen(num) {
@@ -409,9 +467,9 @@
                 let row = '<tr>';
                     for(let j = 0; j < arrObj[i].length; j++) {
                         const border = arrObj[i][j].border ? arrObj[i][j].border : '';
-                            row += `<td class = 'cell _${arrObj[i][j].unionIndex} ${border}'>${arrObj[i][j].num}</td>`;
-                        
-                        
+                        const attr = arrObj[i][j].operAttr ? `data-oper = ${arrObj[i][j].operAttr}` : '';
+
+                            row += `<td class = 'cell ${border}' ${attr}>${arrObj[i][j].num}</td>`;  //_${arrObj[i][j].unionIndex}
                     }
                 row += '</tr>';    
                 inner += row;
