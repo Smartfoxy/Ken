@@ -11,8 +11,9 @@
             background-color: lightblue;
             margin: 50px auto;
             display: flex;
+            flex-flow: column wrap;
             align-items: center;
-            justify-content: space-around;
+            justify-content: space-evenly;
         }
         .table {
             border: 1px solid blue;
@@ -126,6 +127,17 @@
 </head>
 <body>
     <div class="container">
+        <form name="kenOptions">
+            <select name="size">
+                <option value="4">4*4</option>
+                <option value="5">5*5</option>
+                <option value="6">6*6</option>
+                <option value="7">7*7</option>
+                <option value="8">8*8</option>
+                <option value="9">9*9</option>
+            </select>
+            <button type="button" class="btn" name="button">Новый</button>
+        </form>
         <div class="table">
             <table></table>
         </div>
@@ -175,32 +187,44 @@
             }
         }
 
+        const $kenOptionsForm = document.forms.kenOptions;
+        console.log($kenOptionsForm);
+
+
         let repeate = 0; 
-        const num = 9;
-        //const maxCellsInUnion = 4;
-        let indexOfUnion = 0;
-        let arrOfUnions = [];
+        let indexOfUnion;
+            let arrOfUnions = [];
+        //const num = $kenOptionsForm.size.value;
+        $kenOptionsForm.button.addEventListener('click', function(ev) {
+            ev.preventDefault();
+            const num = $kenOptionsForm.size.value;
+            
 
       
 
-        let kenArr = createKen(num);
-        fillKen(kenArr);
+            let kenArr = createKen(num);
+            fillKen(kenArr);
 
-        console.log(kenArr);
+            console.log(kenArr);
+            //indexOfUnion = 0;
 
-        unionCells(kenArr);
+            unionCells(kenArr);
 
-        
-        console.log(arrOfUnions);
+            
+            console.log(arrOfUnions);
 
-        arrOfUnions.forEach(union => {
-            drawBordersOfUnion(union);
-            selectOperator(union);
-            selectCellinUnionForOperAttr(union);
+            arrOfUnions.forEach(union => {
+                drawBordersOfUnion(union);
+                setOperatorAndResult(union);
+                selectCellinUnionForOperAttr(union);
+            })
+
+
+            drawTable(kenArr);
+            
         })
-
-
-        drawTable(kenArr);
+        //const maxCellsInUnion = 4;
+        
 
 
         function unionCells(arrOfCells) {
@@ -333,14 +357,26 @@
 
         }
 
-        function selectOperator(union) {
+        function setOperatorAndResult(union) {
             let operatorAndResult = '';
             let result = 0;
             if(union.cellsInUnion.length === 1) {
                 operatorAndResult = union.cellsInUnion[0].num;
-            }else if(union.cellsInUnion.length === 2){
-                let operator = Math.round(Math.random() * (2 - 1) + 1);
-                switch(operator) {
+            }else if(union.cellsInUnion.length === 2 ){ 
+                if(isdevice(union.cellsInUnion[0], union.cellsInUnion[1])){
+                    operatorAndResult = selectOperator(union, 4);
+                }else {
+                    operatorAndResult = selectOperator(union, 3);
+                } 
+            } else {
+                operatorAndResult = selectOperator(union, 2);     
+            }
+            union.setOperator(operatorAndResult);
+        }
+        function selectOperator(union, num) {
+            let result = 0;
+            let operator = Math.round(Math.random() * (num - 1) + 1);
+            switch(operator) {
                     case 1 :
                         operator = '+';
                         result = union.cellsInUnion.reduce(function(acc, current){
@@ -353,19 +389,27 @@
                             return acc * current.num; 
                         }, 1);
                         break;
-                   /* case 3 :
-                        maxOfFour = 3;
+                    case 3 :
+                        operator = '-';
+                        result = Math.abs(union.cellsInUnion[0].num - union.cellsInUnion[1].num);
                         break;
                     case 4 : 
-                        maxOfFour = 4;
-                        break;*/
+                        operator = '/';
+                        result = union.cellsInUnion[0].num / union.cellsInUnion[1].num; 
+                        result = result < 1 ? 1/result : result;
+                        break;
                     default:
                         alert('упсcccc!')
                 }
-                operatorAndResult = operatorAndResult + result + operator;
-            }
-            union.setOperator(operatorAndResult);
+            return result + operator;
         }
+
+        function isdevice(num1, num2) {
+            const result = num1 > num2 ? num1 / num2 : num2 / num1;
+            return result % 1 === 0;
+        }
+
+       
 
         function selectCellinUnionForOperAttr(union) { 
             let cellsInTopRowSort = union.cellsInUnion.filter(cell => {
@@ -412,6 +456,8 @@
         }
 
         function fillKen(kenArr) {
+            indexOfUnion = 0;
+            console.log('I am fill Ken');
             const length = kenArr.length;
             for(let i = 1; i <= length; i++) {
                 
