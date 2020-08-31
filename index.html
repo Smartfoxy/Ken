@@ -18,16 +18,17 @@
         .table {
             border: 1px solid blue;
             padding: 15px;
-            font-size: 20px;
+            
         }
         .cell {
             border: 1px solid black;
-            padding: 5px;
-            height: 30px;
-            width: 30px;
-            text-align: center;
+            /*height: 30px;
+            width: 30px;*/
+            padding: 0;
+            /*text-align: center;*/
             position: relative;
             color: blue;
+            box-sizing: border-box;
         }
         .cell::after {
             content: attr(data-oper);
@@ -40,6 +41,32 @@
         table {
             border-collapse: collapse;
             border: 3px solid black;
+            
+        }
+        .onFocus {
+            background-color: aqua;
+        }
+        .cellInput {
+            box-sizing: border-box;
+            background-color: lightblue;
+            padding: 5px;
+            border: 0;
+            width: 50px;
+            height: 50px;
+            font-size: 26px;
+            color: green;
+            text-align: center;
+            outline: none;
+            cursor: default;
+
+        }
+        input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"]:focus{
+            
         }
         ._0 {
             background-color: red;
@@ -128,7 +155,8 @@
 <body>
     <div class="container">
         <form name="kenOptions">
-            <select name="size">
+            <label for="size">Размер:</label>
+            <select name="size" id="size">
                 <option value="4">4*4</option>
                 <option value="5">5*5</option>
                 <option value="6">6*6</option>
@@ -146,6 +174,12 @@
 
     <script>
         "use strict"
+
+        //делению увеличить шансы - оставить как есть?
+        //4-ки контроль
+        
+        //ходить назад
+        //заполнять т.к. Рома описал
         
         class Cell {
             constructor(row, col) {
@@ -188,29 +222,39 @@
         }
 
         const $kenOptionsForm = document.forms.kenOptions;
-        console.log($kenOptionsForm);
+
+        
+
+        //const maxCellsInUnion = 4;
+        
+        let indexOfUnion = 0;
+        let arrOfUnions = [];
+        let num = 4;
+        process(num);
 
 
-        let repeate = 0; 
-        let indexOfUnion;
-            let arrOfUnions = [];
-        //const num = $kenOptionsForm.size.value;
+        $kenOptionsForm.size.addEventListener('change', function(ev) {
+            ev.preventDefault();
+            num = $kenOptionsForm.size.value;
+            process(num);
+            
+        })
+
         $kenOptionsForm.button.addEventListener('click', function(ev) {
             ev.preventDefault();
-            const num = $kenOptionsForm.size.value;
-            
+            num = $kenOptionsForm.size.value;
+            process(num); 
+        })
 
-      
 
+        
+        
+
+        function process(num) {
             let kenArr = createKen(num);
             fillKen(kenArr);
-
             console.log(kenArr);
-            //indexOfUnion = 0;
-
             unionCells(kenArr);
-
-            
             console.log(arrOfUnions);
 
             arrOfUnions.forEach(union => {
@@ -219,14 +263,8 @@
                 selectCellinUnionForOperAttr(union);
             })
 
-
             drawTable(kenArr);
-            
-        })
-        //const maxCellsInUnion = 4;
-        
-
-
+        }
         function unionCells(arrOfCells) {
             for(let i = 0; i < arrOfCells.length; i++) {
                 for(let j = 0; j < arrOfCells[i].length; j++) {
@@ -237,7 +275,7 @@
                     }
                     const countOfUnion = Math.round(Math.random() * (4 - 2) + 2); //2/3/4 сделать пропорцию 2/2/1 или считать кол-во 4
                     
-                    console.log('count of union', countOfUnion);
+                    //console.log('count of union', countOfUnion);
                     let currentUnion = new Union(indexOfUnion);
                     for(let z = 0; z < countOfUnion; z++) {
 
@@ -253,14 +291,14 @@
                                 x1 = arr[0];
                                 y1 = arr[1];
                                 dir = arr[2];
-                                console.log('direction^ ', dir);
+                                //console.log('direction^ ', dir);
                                 freeDirections = freeDirections.filter(el => {
                                     //console.log(el);
                                     return (el !== dir);
                                 });
 
 
-                                console.log('attempt:', att , ', X: ',x, 'Y; ', y, 'X1: ',x1, 'Y1: ', y1, freeDirections);
+                                //console.log('attempt:', att , ', X: ',x, 'Y; ', y, 'X1: ',x1, 'Y1: ', y1, freeDirections);
                                 //console.log(!isCellExistAndFree($table, x1, y1));
                                 att++;
                             } while (!isCellExistAndFree(arrOfCells, x1, y1));
@@ -269,14 +307,14 @@
                             y = y1;
                         }
 
-                        console.log(indexOfUnion);
+                        //console.log(indexOfUnion);
 
                         arrOfCells[x][y].unionCells(indexOfUnion);
                         currentUnion.addCellToUnion(arrOfCells[x][y]);
                         
 
                         if(!isFreeNeighborCellExist(arrOfCells, x, y)) {
-                            console.log('break');
+                           // console.log('break');
                             break;
                         }
 
@@ -288,9 +326,6 @@
         }
 
         function getNextCellcoordinates(x, y, freeDirections) {
-            /*for(let i =0; i < freeDirections.length; i++) {
-                console.log('dir:', freeDirections[i]);
-            }*/
             let arrCoordinates = [];
             const index =  Math.round(Math.random() * (freeDirections.length - 1));
             const direction = freeDirections[index];
@@ -363,8 +398,9 @@
             if(union.cellsInUnion.length === 1) {
                 operatorAndResult = union.cellsInUnion[0].num;
             }else if(union.cellsInUnion.length === 2 ){ 
-                if(isdevice(union.cellsInUnion[0], union.cellsInUnion[1])){
-                    operatorAndResult = selectOperator(union, 4);
+                if(divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num) % 1 === 0 && (union.cellsInUnion[0].num !== 1 && union.cellsInUnion[1].num !== 1)){
+                    //console.log(union.cellsInUnion[0], union.cellsInUnion[1], divide(union.cellsInUnion[0], union.cellsInUnion[1]) % 1);
+                    operatorAndResult = divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num) + String.fromCharCode(247);
                 }else {
                     operatorAndResult = selectOperator(union, 3);
                 } 
@@ -384,7 +420,7 @@
                         }, 0);
                         break;
                     case 2 :
-                        operator = 'x';
+                        operator = String.fromCharCode(215);
                         result = union.cellsInUnion.reduce(function(acc, current){
                             return acc * current.num; 
                         }, 1);
@@ -393,21 +429,17 @@
                         operator = '-';
                         result = Math.abs(union.cellsInUnion[0].num - union.cellsInUnion[1].num);
                         break;
-                    case 4 : 
-                        operator = '/';
-                        result = union.cellsInUnion[0].num / union.cellsInUnion[1].num; 
-                        result = result < 1 ? 1/result : result;
-                        break;
                     default:
                         alert('упсcccc!')
                 }
             return result + operator;
         }
 
-        function isdevice(num1, num2) {
+        function divide(num1, num2) {
             const result = num1 > num2 ? num1 / num2 : num2 / num1;
-            return result % 1 === 0;
+            return result;
         }
+
 
        
 
@@ -457,6 +489,7 @@
 
         function fillKen(kenArr) {
             indexOfUnion = 0;
+            arrOfUnions = [];
             console.log('I am fill Ken');
             const length = kenArr.length;
             for(let i = 1; i <= length; i++) {
@@ -474,7 +507,7 @@
                     })
                    
                     if(!restCellForFill.length) {
-                        repeate++;
+                        //repeate++;
                         for(let z = 0; z < j; z++) {
                             kenArr[z].forEach(el => {
                                 if(el.num === i) {
@@ -515,13 +548,23 @@
                         const border = arrObj[i][j].border ? arrObj[i][j].border : '';
                         const attr = arrObj[i][j].operAttr ? `data-oper = ${arrObj[i][j].operAttr}` : '';
 
-                            row += `<td class = 'cell ${border}' ${attr}>${arrObj[i][j].num}</td>`;  //_${arrObj[i][j].unionIndex}
+                            row += `<td class = 'cell ${border}' ${attr}><input type="number" name="cell" class="cellInput" min = "1"></td>`;  //${arrObj[i][j].num}
                     }
                 row += '</tr>';    
                 inner += row;
             }
 
             $table.innerHTML = inner;
+
+            const $cells = $table.querySelectorAll('.cell');
+            $cells.forEach(cell => {  //делегирование здесь нужно
+                cell.addEventListener(('click'), el => {
+                    $cells.forEach(cell => {
+                        cell.classList.remove('onFocus');
+                    })
+                    el.target.classList.add('onFocus');
+                })
+            })
         }
 
          /* let maxOfFour = 1;
