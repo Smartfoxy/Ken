@@ -21,7 +21,7 @@
             
         }
         .cell {
-            border: 1px solid black;
+            border: 1px solid gray;
             /*height: 30px;
             width: 30px;*/
             padding: 0;
@@ -58,14 +58,15 @@
             text-align: center;
             outline: none;
             cursor: default;
-
+            caret-color: transparent;
         }
         input::-webkit-outer-spin-button,
             input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        input[type="number"]:focus{
+        .cellInput:focus{
+            background-color: aqua;
             
         }
         ._0 {
@@ -548,7 +549,7 @@
                         const border = arrObj[i][j].border ? arrObj[i][j].border : '';
                         const attr = arrObj[i][j].operAttr ? `data-oper = ${arrObj[i][j].operAttr}` : '';
 
-                            row += `<td class = 'cell ${border}' ${attr}><input type="number" name="cell" class="cellInput" min = "1"></td>`;  //${arrObj[i][j].num}
+                            row += `<td class = 'cell ${border}' ${attr}><input type="number" name="cell" class="cellInput" maxlength = "1" min = "1" max = "9"></td>`;  //${arrObj[i][j].num}
                     }
                 row += '</tr>';    
                 inner += row;
@@ -557,14 +558,28 @@
             $table.innerHTML = inner;
 
             const $cells = $table.querySelectorAll('.cell');
-            $cells.forEach(cell => {  //делегирование здесь нужно
-                cell.addEventListener(('click'), el => {
-                    $cells.forEach(cell => {
-                        cell.classList.remove('onFocus');
-                    })
-                    el.target.classList.add('onFocus');
+            $cells.forEach(cell => {
+                cell.addEventListener(('change'), el => {
+                    
+                    console.log(cell);
+                    //if(el.target.value !=== cell)
+
                 })
             })
+            /*$cells.forEach(cell => {  //делегирование здесь нужно
+                cell.addEventListener(('click'), el => {
+                    $cells.forEach(cell => {
+                        cell.firstElementChild.classList.remove('onFocus');
+                    })
+                    console.log(el.target);
+                    el.target.classList.add('onFocus');
+                })
+            })*/
+        }
+
+        function isNumberInCellCorect($cell) {
+
+
         }
 
          /* let maxOfFour = 1;
