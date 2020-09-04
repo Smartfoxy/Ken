@@ -67,7 +67,9 @@
         }
         .cellInput:focus{
             background-color: aqua;
-            
+        }
+        .red {
+            color: red;
         }
         ._0 {
             background-color: red;
@@ -508,7 +510,6 @@
                     })
                    
                     if(!restCellForFill.length) {
-                        //repeate++;
                         for(let z = 0; z < j; z++) {
                             kenArr[z].forEach(el => {
                                 if(el.num === i) {
@@ -558,28 +559,66 @@
             $table.innerHTML = inner;
 
             const $cells = $table.querySelectorAll('.cell');
-            $cells.forEach(cell => {
-                cell.addEventListener(('change'), el => {
-                    
-                    console.log(cell);
-                    //if(el.target.value !=== cell)
+            console.log($cells);
 
+            $cells.forEach(cell => { //делегирование от таблиці и всплітие
+                cell.addEventListener(('input'), event => {
+                 
+                   const cellsIncurrentRowArray = Array.from($table.rows[event.currentTarget.parentElement.rowIndex].cells);
+                   console.log(event.target);
+
+                   cellsIncurrentRowArray.forEach(current => {
+                        const restOfCells = cellsIncurrentRowArray.filter(el => {
+                                return el !== current;
+                            })
+                        const sameValue = restOfCells.find(rest => {
+                            return current.firstElementChild.value && rest.firstElementChild.value === current.firstElementChild.value;
+                        })
+                        if(sameValue) {
+                            current.firstElementChild.classList.add('red');
+                        } else {
+                            if(current.firstElementChild.classList.contains('red')){
+                                current.firstElementChild.classList.remove('red');
+                            }
+                        }
+                   })
+
+                 
+
+
+
+                    
+                    //console.log(getTargetNumOfCell(cell, arrObj), +el.target.value, el.target.classList.contains('red'));
+                    /*if(+el.target.value === getTargetNumOfCell(cell, arrObj) && el.target.classList.contains('red')) {
+                        el.target.classList.remove('red');
+                    } else if(+el.target.value !== getTargetNumOfCell(cell, arrObj)){
+                        el.target.classList.add('red');
+                    }    */
+                    
                 })
             })
-            /*$cells.forEach(cell => {  //делегирование здесь нужно
-                cell.addEventListener(('click'), el => {
-                    $cells.forEach(cell => {
-                        cell.firstElementChild.classList.remove('onFocus');
-                    })
-                    console.log(el.target);
-                    el.target.classList.add('onFocus');
-                })
-            })*/
+           
         }
 
-        function isNumberInCellCorect($cell) {
+        function isNumberTheOneInRow($table, $cell) {
+            $table.rows[$cell.parentElement.rowIndex].cells.forEach(cell => {
+                console.log(cell.value);
+            })
 
 
+
+        }
+        function isNumberTheOneInCol($cell) {
+
+
+        }
+        function isAllNumbersCorrectInUnion($cell) {
+
+
+        }
+
+        function getTargetNumOfCell($cell, kenArr) {
+           return kenArr[$cell.parentElement.rowIndex][$cell.cellIndex].num;  
         }
 
          /* let maxOfFour = 1;
