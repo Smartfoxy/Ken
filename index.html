@@ -58,7 +58,7 @@
             text-align: center;
             outline: none;
             cursor: default;
-            caret-color: transparent;
+           /*caret-color: transparent;*/
         }
         input::-webkit-outer-spin-button,
             input::-webkit-inner-spin-button {
@@ -180,6 +180,9 @@
 
         //делению увеличить шансы - оставить как есть?
         //4-ки контроль
+        //input полностью на всю ячейку
+        //юнион краснім
+        //решить кнопка
         
         //ходить назад
         //заполнять т.к. Рома описал
@@ -233,6 +236,7 @@
         let indexOfUnion = 0;
         let arrOfUnions = [];
         let num = 4;
+        let tab = 1;
         process(num);
 
 
@@ -550,7 +554,8 @@
                         const border = arrObj[i][j].border ? arrObj[i][j].border : '';
                         const attr = arrObj[i][j].operAttr ? `data-oper = ${arrObj[i][j].operAttr}` : '';
 
-                            row += `<td class = 'cell ${border}' ${attr}><input type="number" name="cell" class="cellInput" maxlength = "1" min = "1" max = "9"></td>`;  //${arrObj[i][j].num}
+                            row += `<td tabindex=${tab} class = 'cell ${border}' ${attr}><input type="number" name="cell" class="cellInput" maxlength = "1" min = "1" max = "9"></td>`;  //${arrObj[i][j].num}
+                            tab++;
                     }
                 row += '</tr>';    
                 inner += row;
@@ -563,43 +568,38 @@
 
             $cells.forEach(cell => { //делегирование от таблиці и всплітие
                 cell.addEventListener(('input'), event => {
-                 
-                   const cellsIncurrentRowArray = Array.from($table.rows[event.currentTarget.parentElement.rowIndex].cells);
-                   console.log(event.currentTarget.cellIndex);
 
-                   const cellsIncurrentColArray = Array.from($cells).filter(el =>{
-                       return el.cellIndex === event.currentTarget.cellIndex
+                    /*event.target.focus();
+                    event.target.selectionStart = event.target.value.length;*/
+
+                    console.log('before ', event.target.value);
+                    if(+event.target.value === 0) {
+                       event.target.value = null;
+                    }
+                    if(event.target.value.length > 1) {
+                        
+                       event.target.value = event.target.value.slice(1);
+                       if(+event.target.value === 0) {
+                            event.target.value = null;
+                        }
+                   }
+                   console.log(event.target.value);
+                                   
+                   const cellsInCurrentRowArray = Array.from($table.rows[event.currentTarget.parentElement.rowIndex].cells);
+
+                   const cellsInCurrentColArray = Array.from($cells).filter(el =>{
+                       return el.cellIndex === event.currentTarget.cellIndex;
                    }); 
 
-                   cellsIncurrentRowArray.forEach(current => {
-                        if(isNumberRepeatInRow(cellsIncurrentRowArray, current) || isNumberRepeatInRow(cellsIncurrentColArray, current)) {
-                            current.firstElementChild.classList.add('red');
-                        } else {
-                            if(current.firstElementChild.classList.contains('red')){
-                                current.firstElementChild.classList.remove('red');
-                            }
-                        } 
-                   })
+                   cellsInCurrentRowArray.forEach(current => {
+                        markCellInputIfRepeat($table, current);
+                   });
+
+                   cellsInCurrentColArray.forEach(current => {
+                        markCellInputIfRepeat($table, current);
+                   });
                    
-                   cellsIncurrentColArray.forEach(current => {
-                        if(isNumberRepeatInRow(cellsIncurrentRowArray, current) || isNumberRepeatInRow(cellsIncurrentColArray, current)) {
-                                current.firstElementChild.classList.add('red');
-                            } else {
-                                if(current.firstElementChild.classList.contains('red')){
-                                    current.firstElementChild.classList.remove('red');
-                                }
-                            }
-                          
-                  })
-                   
-
-                   
-
-                 
-
-
-
-                    
+                                                        
                     //console.log(getTargetNumOfCell(cell, arrObj), +el.target.value, el.target.classList.contains('red'));
                     /*if(+el.target.value === getTargetNumOfCell(cell, arrObj) && el.target.classList.contains('red')) {
                         el.target.classList.remove('red');
@@ -612,9 +612,9 @@
            
         }
 
-        function isNumberRepeatInRow(row, cell) {
+        function isNumberRepeatInLine(line, cell) {
             
-            const isRepeat = row.filter(el => {
+            const isRepeat = line.filter(el => {
                 return el !== cell;
             }).find(rest => {
                 return cell.firstElementChild.value && rest.firstElementChild.value === cell.firstElementChild.value;
@@ -622,16 +622,26 @@
             return isRepeat;
         }
 
-        function isNumberRepeatInCol(col, cell) {
-            const isRepeat = row.filter(el => {
-                return el !== cell;
-            }).find(rest => {
-                return cell.firstElementChild.value && rest.firstElementChild.value === cell.firstElementChild.value;
-            })
-            return isRepeat;
+        function isNumberRepeatInRowOrCol(table, cell) {
+            const cells = table.querySelectorAll('td');
+            const cellsInCurrentRow = Array.from(table.rows[cell.parentElement.rowIndex].cells);
+            const cellsInCurrentCol = Array.from(cells).filter(el =>{
+                       return el.cellIndex === cell.cellIndex;
+                   });
 
-
+            return  isNumberRepeatInLine(cellsInCurrentRow, cell) || isNumberRepeatInLine(cellsInCurrentCol, cell);
         }
+        
+        function markCellInputIfRepeat(table, cell) {
+            if(isNumberRepeatInRowOrCol(table, cell)) {
+                cell.firstElementChild.classList.add('red');
+            } else {
+                if(cell.firstElementChild.classList.contains('red')){
+                    cell.firstElementChild.classList.remove('red');
+                }
+            }
+        }
+
         function isAllNumbersCorrectInUnion($cell) {
 
 
