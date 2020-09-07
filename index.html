@@ -565,23 +565,35 @@
                 cell.addEventListener(('input'), event => {
                  
                    const cellsIncurrentRowArray = Array.from($table.rows[event.currentTarget.parentElement.rowIndex].cells);
-                   console.log(event.target);
+                   console.log(event.currentTarget.cellIndex);
+
+                   const cellsIncurrentColArray = Array.from($cells).filter(el =>{
+                       return el.cellIndex === event.currentTarget.cellIndex
+                   }); 
 
                    cellsIncurrentRowArray.forEach(current => {
-                        const restOfCells = cellsIncurrentRowArray.filter(el => {
-                                return el !== current;
-                            })
-                        const sameValue = restOfCells.find(rest => {
-                            return current.firstElementChild.value && rest.firstElementChild.value === current.firstElementChild.value;
-                        })
-                        if(sameValue) {
+                        if(isNumberRepeatInRow(cellsIncurrentRowArray, current) || isNumberRepeatInRow(cellsIncurrentColArray, current)) {
                             current.firstElementChild.classList.add('red');
                         } else {
                             if(current.firstElementChild.classList.contains('red')){
                                 current.firstElementChild.classList.remove('red');
                             }
-                        }
+                        } 
                    })
+                   
+                   cellsIncurrentColArray.forEach(current => {
+                        if(isNumberRepeatInRow(cellsIncurrentRowArray, current) || isNumberRepeatInRow(cellsIncurrentColArray, current)) {
+                                current.firstElementChild.classList.add('red');
+                            } else {
+                                if(current.firstElementChild.classList.contains('red')){
+                                    current.firstElementChild.classList.remove('red');
+                                }
+                            }
+                          
+                  })
+                   
+
+                   
 
                  
 
@@ -600,15 +612,23 @@
            
         }
 
-        function isNumberTheOneInRow($table, $cell) {
-            $table.rows[$cell.parentElement.rowIndex].cells.forEach(cell => {
-                console.log(cell.value);
+        function isNumberRepeatInRow(row, cell) {
+            
+            const isRepeat = row.filter(el => {
+                return el !== cell;
+            }).find(rest => {
+                return cell.firstElementChild.value && rest.firstElementChild.value === cell.firstElementChild.value;
             })
-
-
-
+            return isRepeat;
         }
-        function isNumberTheOneInCol($cell) {
+
+        function isNumberRepeatInCol(col, cell) {
+            const isRepeat = row.filter(el => {
+                return el !== cell;
+            }).find(rest => {
+                return cell.firstElementChild.value && rest.firstElementChild.value === cell.firstElementChild.value;
+            })
+            return isRepeat;
 
 
         }
