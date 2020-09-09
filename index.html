@@ -22,13 +22,13 @@
         }
         .cell {
             border: 1px solid gray;
-            /*height: 30px;
-            width: 30px;*/
-            padding: 0;
-            /*text-align: center;*/
+            height: 50px;
+            width: 50px;
+           /*padding: 10px;*/
+            text-align: center;
             position: relative;
-            color: blue;
-            box-sizing: border-box;
+            font-size: 28px;
+            color: green;
         }
         .cell::after {
             content: attr(data-oper);
@@ -40,13 +40,16 @@
         }
         table {
             border-collapse: collapse;
-            border: 3px solid black;
-            
+            border: 3px solid black;  
         }
-        .onFocus {
+        /*.onFocus {
             background-color: aqua;
+        }*/
+        .cell:focus{
+            background-color: aqua;
+            outline: none;
         }
-        .cellInput {
+        /*.cellInput {
             box-sizing: border-box;
             background-color: lightblue;
             padding: 5px;
@@ -59,7 +62,7 @@
             outline: none;
             cursor: default;
            /*caret-color: transparent;*/
-        }
+        /*}
         input::-webkit-outer-spin-button,
             input::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -67,7 +70,7 @@
         }
         .cellInput:focus{
             background-color: aqua;
-        }
+        }*/
         .red {
             color: red;
         }
@@ -178,9 +181,9 @@
     <script>
         "use strict"
 
-        //делению увеличить шансы - оставить как есть?
+        
         //4-ки контроль
-        //input полностью на всю ячейку
+        
         //юнион краснім
         //решить кнопка
         
@@ -206,8 +209,8 @@
             addBorder(type) {
                 this.border += type + ' ';
             }
-            addOperatorAttr(oper) {
-                this.operAttr = oper;
+            addOperatorAttr(oper_res) {
+                this.oper_resAttr = oper_res;
             }
         }
 
@@ -215,6 +218,8 @@
             constructor(index) {
                 this.index = index;
                 this.cellsInUnion = [];
+                this.oper;
+                this.result;
             }
             addCellToUnion(cell) {
                 this.cellsInUnion.push(cell);
@@ -224,6 +229,12 @@
             }
             setOperator(oper) {
                 this.oper = oper;
+            }
+            setResult(result) {
+                this.result = result;
+            }
+            setOperatorAndResult() {
+                this.oper_result = this.result + this.oper;
             }
         }
 
@@ -399,7 +410,7 @@
 
         }
 
-        function setOperatorAndResult(union) {
+        /*function setOperatorAndResult(union) {
             let operatorAndResult = '';
             let result = 0;
             if(union.cellsInUnion.length === 1) {
@@ -414,9 +425,37 @@
             } else {
                 operatorAndResult = selectOperator(union, 2);     
             }
-            union.setOperator(operatorAndResult);
+            union.setOperatorAndResult(operatorAndResult);
+        }*/
+
+        function setOperatorAndResult(union) {
+            let operator = '';
+            let result = 0;
+            if(union.cellsInUnion.length === 1) {
+                result = union.cellsInUnion[0].num;
+            } else if(union.cellsInUnion.length === 2 ){ 
+                if(divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num) % 1 === 0) { 
+                    if(union.cellsInUnion[0].num !== 1 && union.cellsInUnion[1].num !== 1) {
+                        operator = String.fromCharCode(247);
+                        result = divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num);
+                    } else {
+                        operator = selectOperator(4);
+                        result = getResultOfOperation(union, operator);
+                    }  
+                }else {
+                    operator = selectOperator(3);
+                    result = getResultOfOperation(union, operator);
+                } 
+            } else {
+                operator = selectOperator(2);
+                result = getResultOfOperation(union, operator);     
+            }
+            union.setOperator(operator);
+            union.setResult(result);
+            union.setOperatorAndResult();
         }
-        function selectOperator(union, num) {
+
+       /* function selectOperator(union, num) {
             let result = 0;
             let operator = Math.round(Math.random() * (num - 1) + 1);
             switch(operator) {
@@ -440,7 +479,56 @@
                         alert('упсcccc!')
                 }
             return result + operator;
+        }*/
+        function selectOperator(num) {
+            const operatorIndex = Math.round(Math.random() * (num - 1) + 1);
+            let operator = '';
+            switch(operatorIndex) {
+                    case 1 :
+                        operator = '+';
+                        break;
+                    case 2 :
+                        operator = String.fromCharCode(215);
+                        break;
+                    case 3 :
+                        operator = '-';
+                        break;
+                    case 4 :
+                        operator = String.fromCharCode(247);
+                        break;
+                    default:
+                        alert('упсcccc!')
+                }
+            return operator;
         }
+        function getResultOfOperation(union, operator) {
+            let result = 0;
+            
+            switch(operator) {
+                    case '+' :
+                        result = union.cellsInUnion.reduce(function(acc, current){
+                            return acc + current.num; 
+                        }, 0);
+                        break;
+                    case String.fromCharCode(215) :
+                        result = union.cellsInUnion.reduce(function(acc, current){
+                            return acc * current.num; 
+                        }, 1);
+                        break;
+                    case '-' :
+                        result = Math.abs(union.cellsInUnion[0].num - union.cellsInUnion[1].num);
+                        break;
+                    case String.fromCharCode(247) :
+                        result = divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num);
+                        break;
+                    default:
+                        alert('упсcccc!')
+                }
+            return result;
+        }
+
+
+
 
         function divide(num1, num2) {
             const result = num1 > num2 ? num1 / num2 : num2 / num1;
@@ -454,7 +542,7 @@
             let cellsInTopRowSort = union.cellsInUnion.filter(cell => {
                 return cell.row === union.sortRowsNums[0];
             }).sort(compareCellsByCol);
-            cellsInTopRowSort[0].addOperatorAttr(union.oper);
+            cellsInTopRowSort[0].addOperatorAttr(union.oper_result);
         }
         
         function compareCellsByRow(cell1, cell2) {
@@ -552,10 +640,10 @@
                 let row = '<tr>';
                     for(let j = 0; j < arrObj[i].length; j++) {
                         const border = arrObj[i][j].border ? arrObj[i][j].border : '';
-                        const attr = arrObj[i][j].operAttr ? `data-oper = ${arrObj[i][j].operAttr}` : '';
+                        const attr = arrObj[i][j].oper_resAttr ? `data-oper = ${arrObj[i][j].oper_resAttr}` : '';
 
-                            row += `<td tabindex=${tab} class = 'cell ${border}' ${attr}><input type="number" name="cell" class="cellInput" maxlength = "1" min = "1" max = "9"></td>`;  //${arrObj[i][j].num}
-                            tab++;
+                            
+                            row += `<td class = 'cell ${border}' ${attr} tabindex = '1'>${arrObj[i][j].num}</td>`;
                     }
                 row += '</tr>';    
                 inner += row;
@@ -566,50 +654,91 @@
             const $cells = $table.querySelectorAll('.cell');
             console.log($cells);
 
-            $cells.forEach(cell => { //делегирование от таблиці и всплітие
-                cell.addEventListener(('input'), event => {
-
-                    /*event.target.focus();
-                    event.target.selectionStart = event.target.value.length;*/
-
-                    console.log('before ', event.target.value);
-                    if(+event.target.value === 0) {
-                       event.target.value = null;
+            $cells.forEach(cell => {
+                cell.addEventListener('click', event => {
+                    event.target.focus();
+                })
+                cell.addEventListener('keydown', event => {
+                    if(event.key >= 1 && event.key <= num) {
+                        event.target.textContent = event.key;
                     }
-                    if(event.target.value.length > 1) {
-                        
-                       event.target.value = event.target.value.slice(1);
-                       if(+event.target.value === 0) {
-                            event.target.value = null;
-                        }
-                   }
-                   console.log(event.target.value);
-                                   
-                   const cellsInCurrentRowArray = Array.from($table.rows[event.currentTarget.parentElement.rowIndex].cells);
+                    
+                    let keyCode = event.keyCode;
+                    let row = event.target.parentElement.rowIndex;
+                    let col = event.target.cellIndex;
 
-                   const cellsInCurrentColArray = Array.from($cells).filter(el =>{
-                       return el.cellIndex === event.currentTarget.cellIndex;
-                   }); 
+                    if(keyCode === 46 || keyCode === 8) {
+                        event.target.textContent = null;
+                    }
 
-                   cellsInCurrentRowArray.forEach(current => {
+                    const cellsInCurrentRowArray = Array.from($table.rows[row].cells);
+
+                    const cellsInCurrentColArray = Array.from($cells).filter(el =>{
+                        return el.cellIndex === col;
+                    });
+
+                    //const cellsInCurrentUnion
+                    cellsInCurrentRowArray.forEach(current => {
                         markCellInputIfRepeat($table, current);
                    });
 
                    cellsInCurrentColArray.forEach(current => {
                         markCellInputIfRepeat($table, current);
                    });
+
+                    console.log(event.keyCode);
+
+
+                    if(keyCode >= 37 && keyCode <= 40) {
+                        switch(keyCode) {
+                            case 37: 
+                                if(col === 0) {
+                                    col = col + num;
+                                } 
+                                setFocus($table, row, col - 1);
+                                break;
+                            case 38: 
+                                if(row === 0) {
+                                    row = row + num;
+                                } 
+                                setFocus($table, row - 1, col);
+                                break;
+                            case 39: 
+                                if(col === num - 1) {
+                                    col = col - num;
+                                } 
+                                setFocus($table, row, col + 1);
+                                break;
+                            case 40: 
+                                if(row === num - 1) {
+                                    row = row - num;
+                                } 
+                                setFocus($table, row + 1, col);
+                                break;
+                        }
+                        
+                    }
+                }) 
+            })               
+                                   
                    
                                                         
-                    //console.log(getTargetNumOfCell(cell, arrObj), +el.target.value, el.target.classList.contains('red'));
-                    /*if(+el.target.value === getTargetNumOfCell(cell, arrObj) && el.target.classList.contains('red')) {
-                        el.target.classList.remove('red');
-                    } else if(+el.target.value !== getTargetNumOfCell(cell, arrObj)){
-                        el.target.classList.add('red');
-                    }    */
+                                    //console.log(getTargetNumOfCell(cell, arrObj), +el.target.value, el.target.classList.contains('red'));
+                                    /*if(+el.target.value === getTargetNumOfCell(cell, arrObj) && el.target.classList.contains('red')) {
+                                        el.target.classList.remove('red');
+                                    } else if(+el.target.value !== getTargetNumOfCell(cell, arrObj)){
+                                        el.target.classList.add('red');
+                                    }    */
                     
-                })
-            })
+               
            
+        }
+
+        function setFocus(table, row, col) {
+            const cells = table.querySelectorAll('td');
+            Array.from(cells).find(td => {              
+                return (td.parentElement.rowIndex === row) && (td.cellIndex === col);
+            }).focus();
         }
 
         function isNumberRepeatInLine(line, cell) {
@@ -617,7 +746,7 @@
             const isRepeat = line.filter(el => {
                 return el !== cell;
             }).find(rest => {
-                return cell.firstElementChild.value && rest.firstElementChild.value === cell.firstElementChild.value;
+                return cell.textContent && rest.textContent === cell.textContent;
             })
             return isRepeat;
         }
@@ -634,10 +763,10 @@
         
         function markCellInputIfRepeat(table, cell) {
             if(isNumberRepeatInRowOrCol(table, cell)) {
-                cell.firstElementChild.classList.add('red');
+                cell.classList.add('red');
             } else {
-                if(cell.firstElementChild.classList.contains('red')){
-                    cell.firstElementChild.classList.remove('red');
+                if(cell.classList.contains('red')){
+                    cell.classList.remove('red');
                 }
             }
         }
@@ -668,7 +797,7 @@
             default:
                 alert('упсcccc!')
         }*/
-
+        //row += `<td class = 'cell ${border}' ${attr}><input type="number" name="cell" class="cellInput" maxlength = "1" min = "1" max = "9"></td>`;  //${arrObj[i][j].num}
         
 
        
