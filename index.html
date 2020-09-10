@@ -640,10 +640,11 @@
                 let row = '<tr>';
                     for(let j = 0; j < arrObj[i].length; j++) {
                         const border = arrObj[i][j].border ? arrObj[i][j].border : '';
-                        const attr = arrObj[i][j].oper_resAttr ? `data-oper = ${arrObj[i][j].oper_resAttr}` : '';
+                        const attr_oper = arrObj[i][j].oper_resAttr ? `data-oper = ${arrObj[i][j].oper_resAttr}` : '';
+                        const attr_union = `data-union = ${arrObj[i][j].unionIndex}`;
 
                             
-                            row += `<td class = 'cell ${border}' ${attr} tabindex = '1'>${arrObj[i][j].num}</td>`;
+                            row += `<td class = 'cell ${border}' ${attr_oper} ${attr_union} tabindex = '1'>${arrObj[i][j].num}</td>`;
                     }
                 row += '</tr>';    
                 inner += row;
@@ -666,6 +667,7 @@
                     let keyCode = event.keyCode;
                     let row = event.target.parentElement.rowIndex;
                     let col = event.target.cellIndex;
+                    const currentUnionIndex = event.target.dataset.union;
 
                     if(keyCode === 46 || keyCode === 8) {
                         event.target.textContent = null;
@@ -677,7 +679,12 @@
                         return el.cellIndex === col;
                     });
 
-                    //const cellsInCurrentUnion
+                    const cellsInCurrentUnion = Array.from($cells).filter(cell => {
+                        return cell.dataset.union === currentUnionIndex;
+                    })
+
+                    console.log(cellsInCurrentUnion);
+
                     cellsInCurrentRowArray.forEach(current => {
                         markCellInputIfRepeat($table, current);
                    });
@@ -687,6 +694,13 @@
                    });
 
                     console.log(event.keyCode);
+                    
+
+                    if(+currentUnionIndex === 1) {
+                        console.log('ky ky');
+                        const styleElem = document.head.appendChild(document.createElement('style'));
+                        styleElem.innerHTML = ".cell[data-union = '1']::after {color: red;}"
+                    }
 
 
                     if(keyCode >= 37 && keyCode <= 40) {
