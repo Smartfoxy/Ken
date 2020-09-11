@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ken_Ken</title>
     <style>
+        :root {
+            --result-color: black;
+            --union-index: 2;
+        }
+
         .container {
             width: 800px;
             height: 800px;
-            background-color: lightblue;
+            background-color: rgb(224, 224, 224);
             margin: 50px auto;
             display: flex;
             flex-flow: column wrap;
@@ -22,9 +27,8 @@
         }
         .cell {
             border: 1px solid gray;
-            height: 50px;
-            width: 50px;
-           /*padding: 10px;*/
+            height: 45px;
+            width: 45px;
             text-align: center;
             position: relative;
             font-size: 28px;
@@ -35,18 +39,18 @@
             position: absolute;
             left: 0;
             top: 0;
-            color: black;
+            color: var( --result-color, black);
             font-size: 14px;
+        }
+        .cell.wrongResult::after {
+            color: red;
         }
         table {
             border-collapse: collapse;
             border: 3px solid black;  
         }
-        /*.onFocus {
-            background-color: aqua;
-        }*/
         .cell:focus{
-            background-color: aqua;
+            background-color: #80808082;
             outline: none;
         }
         /*.cellInput {
@@ -73,6 +77,12 @@
         }*/
         .red {
             color: red;
+        }
+        .bottom {
+            border-bottom: 3px solid black;
+        }
+        .right {
+            border-right: 3px solid black;    
         }
         ._0 {
             background-color: red;
@@ -149,12 +159,7 @@
         ._24 {
             background-color: lightgray;
         }
-        .bottom {
-            border-bottom: 3px solid black;
-        }
-        .right {
-            border-right: 3px solid black;    
-        }
+        
         
     </style>
 </head>
@@ -170,7 +175,8 @@
                 <option value="8">8*8</option>
                 <option value="9">9*9</option>
             </select>
-            <button type="button" class="btn" name="button">Новый</button>
+            <button type="button" class="btn" name="new">Новый</button>
+            <button type="button" class="btn" name="resolve">Решить</button>
         </form>
         <div class="table">
             <table></table>
@@ -182,12 +188,16 @@
         "use strict"
 
         
-        //4-ки контроль
         
-        //юнион краснім
-        //решить кнопка
+        //отменить ход
+
+        //если все правильно - помигать
+        //правильно - исходя из повторов и результата операции и когда нет пустіх ячеек
+        //может нужно кей ап использовать чтобы Ура было после того как цифра нарисовалась
         
-        //ходить назад
+        //соседние проверять- ели у них нет соседей то брать их в юнион
+        //ходить назад, разніе фигуры
+
         //заполнять т.к. Рома описал
         
         class Cell {
@@ -218,8 +228,8 @@
             constructor(index) {
                 this.index = index;
                 this.cellsInUnion = [];
-                this.oper;
-                this.result;
+                this.oper = '';
+                this.result = '';
             }
             addCellToUnion(cell) {
                 this.cellsInUnion.push(cell);
@@ -241,31 +251,25 @@
         const $kenOptionsForm = document.forms.kenOptions;
 
         
-
-        //const maxCellsInUnion = 4;
-        
         let indexOfUnion = 0;
         let arrOfUnions = [];
-        let num = 4;
+        let num = 3;
         let tab = 1;
         process(num);
+       
 
 
         $kenOptionsForm.size.addEventListener('change', function(ev) {
             ev.preventDefault();
             num = $kenOptionsForm.size.value;
-            process(num);
-            
+            process(num);   
         })
 
-        $kenOptionsForm.button.addEventListener('click', function(ev) {
+        $kenOptionsForm.new.addEventListener('click', function(ev) {
             ev.preventDefault();
-            num = $kenOptionsForm.size.value;
-            process(num); 
+            num = +$kenOptionsForm.size.value;
+            process(num);    
         })
-
-
-        
         
 
         function process(num) {
@@ -281,9 +285,79 @@
                 selectCellinUnionForOperAttr(union);
             })
 
-            drawTable(kenArr);
+            drawTableForResolve(kenArr);
+            $kenOptionsForm.resolve.addEventListener('click', function(ev) {
+                ev.preventDefault();
+                drawResolvedTable(kenArr);
+            })
         }
+
+        function createKen(num) {
+            let kenArr = [];
+            for(let i = 0; i < num; i++) {
+                let rowArr = [];
+                for(let j = 0; j < num; j++) {
+                    rowArr.push(new Cell(i, j));
+                }
+                kenArr.push(rowArr);
+            }
+            return kenArr;
+        }
+
+        function fillKen(kenArr) {
+            indexOfUnion = 0;
+            arrOfUnions = [];
+            console.log('I am fill Ken');
+            const length = kenArr.length;
+            for(let i = 1; i <= length; i++) {
+                
+                for(let j = 0; j < length; j++) {
+                    let emptyCellInRow = kenArr[j].filter(function(cell) {
+                        return !cell.fill;
+                    })
+                    let restCellForFill = emptyCellInRow.filter(function(el) {
+                        let result = true;
+                        for(let z = 0; z < j; z++) {
+                            if(kenArr[z][el.col].num === i) result = false;
+                        }
+                        return result;
+                    })
+                   
+                    if(!restCellForFill.length) {
+                        for(let z = 0; z < j; z++) {
+                            kenArr[z].forEach(el => {
+                                if(el.num === i) {
+                                    el.num = null;
+                                    el.fill = false;
+                                }
+                            });
+                        }
+
+                        j = -1;
+                        continue;
+                    }   
+                    
+                    //console.log(j, restCellForFill);
+                    let col = Math.round(Math.random() * (restCellForFill.length - 1));
+                    let currentCell = restCellForFill[col];
+                    currentCell.fillNum(i);
+                    for(let i = 0; i < length; i++) {
+                        let result = '';
+                        for(let j = 0; j < length; j++){
+                            let cur = kenArr[i][j].num ? kenArr[i][j].num : 0;
+                            result += cur + " ";
+                        }
+                        //console.log(result); 
+                    }
+                    
+                }
+
+            }
+        }
+
         function unionCells(arrOfCells) {
+           let countUnionWithFour = 0;
+           const maxCountUnionWithFour = (num - 4);
             for(let i = 0; i < arrOfCells.length; i++) {
                 for(let j = 0; j < arrOfCells[i].length; j++) {
                     let x = i;
@@ -291,11 +365,24 @@
                     if(arrOfCells[x][y].union){
                         continue;
                     }
-                    const countOfUnion = Math.round(Math.random() * (4 - 2) + 2); //2/3/4 сделать пропорцию 2/2/1 или считать кол-во 4
-                    
-                    //console.log('count of union', countOfUnion);
+                    let countCell;
+
+                    if(num == 4) {
+                        countCell = Math.round(Math.random() * (3 - 2) + 2);
+                       
+                    } else {
+                         
+                        if(countUnionWithFour < maxCountUnionWithFour) {
+                            countCell = Math.round(Math.random() * (4 - 2) + 2);
+                            if(countCell === 4) countUnionWithFour++;
+                        } else {
+                            countCell = Math.round(Math.random() * (3 - 2) + 2);
+                        }                         
+                    }
+                   
+                    //console.log('count of union', countCell);
                     let currentUnion = new Union(indexOfUnion);
-                    for(let z = 0; z < countOfUnion; z++) {
+                    for(let z = 0; z < countCell; z++) {
 
                        if(z !== 0) {
                             let x1;
@@ -410,23 +497,7 @@
 
         }
 
-        /*function setOperatorAndResult(union) {
-            let operatorAndResult = '';
-            let result = 0;
-            if(union.cellsInUnion.length === 1) {
-                operatorAndResult = union.cellsInUnion[0].num;
-            }else if(union.cellsInUnion.length === 2 ){ 
-                if(divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num) % 1 === 0 && (union.cellsInUnion[0].num !== 1 && union.cellsInUnion[1].num !== 1)){
-                    //console.log(union.cellsInUnion[0], union.cellsInUnion[1], divide(union.cellsInUnion[0], union.cellsInUnion[1]) % 1);
-                    operatorAndResult = divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num) + String.fromCharCode(247);
-                }else {
-                    operatorAndResult = selectOperator(union, 3);
-                } 
-            } else {
-                operatorAndResult = selectOperator(union, 2);     
-            }
-            union.setOperatorAndResult(operatorAndResult);
-        }*/
+       
 
         function setOperatorAndResult(union) {
             let operator = '';
@@ -440,46 +511,21 @@
                         result = divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num);
                     } else {
                         operator = selectOperator(4);
-                        result = getResultOfOperation(union, operator);
+                        result = getResultOfOperationInObject(union, operator);
                     }  
                 }else {
                     operator = selectOperator(3);
-                    result = getResultOfOperation(union, operator);
+                    result = getResultOfOperationInObject(union, operator);
                 } 
             } else {
                 operator = selectOperator(2);
-                result = getResultOfOperation(union, operator);     
+                result = getResultOfOperationInObject(union, operator);     
             }
             union.setOperator(operator);
             union.setResult(result);
             union.setOperatorAndResult();
         }
-
-       /* function selectOperator(union, num) {
-            let result = 0;
-            let operator = Math.round(Math.random() * (num - 1) + 1);
-            switch(operator) {
-                    case 1 :
-                        operator = '+';
-                        result = union.cellsInUnion.reduce(function(acc, current){
-                            return acc + current.num; 
-                        }, 0);
-                        break;
-                    case 2 :
-                        operator = String.fromCharCode(215);
-                        result = union.cellsInUnion.reduce(function(acc, current){
-                            return acc * current.num; 
-                        }, 1);
-                        break;
-                    case 3 :
-                        operator = '-';
-                        result = Math.abs(union.cellsInUnion[0].num - union.cellsInUnion[1].num);
-                        break;
-                    default:
-                        alert('упсcccc!')
-                }
-            return result + operator;
-        }*/
+   
         function selectOperator(num) {
             const operatorIndex = Math.round(Math.random() * (num - 1) + 1);
             let operator = '';
@@ -501,7 +547,7 @@
                 }
             return operator;
         }
-        function getResultOfOperation(union, operator) {
+        function getResultOfOperationInObject(union, operator) {
             let result = 0;
             
             switch(operator) {
@@ -527,7 +573,32 @@
             return result;
         }
 
-
+        function getResultOfOperationInNode(union, operator) {
+            let result = 0;
+            
+            switch(operator) {
+                    case '+' :
+                        result = union.reduce(function(acc, current){
+                            return acc + +current.textContent; 
+                        }, 0);
+                        break;
+                    case String.fromCharCode(215) :
+                        result = union.reduce(function(acc, current){
+                            return acc * current.textContent; 
+                        }, 1);
+                        break;
+                    case '-' :
+                        result = Math.abs(union[0].textContent - union[1].textContent);
+                        break;
+                    case String.fromCharCode(247) :
+                        result = divide(union[0].textContent,union[1].textContent);
+                        break;
+                    default:
+                        console.log('upssss')
+                        alert('упсcccc!')
+                }
+            return result;
+        }
 
 
         function divide(num1, num2) {
@@ -567,74 +638,15 @@
         function isFreeNeighborCellExist(arrOfCells, x, y) {
             return isCellExistAndFree(arrOfCells, x + 1, y) || isCellExistAndFree(arrOfCells, x - 1, y) || isCellExistAndFree(arrOfCells, x, y + 1) || isCellExistAndFree(arrOfCells, x, y - 1);
         }
-        
-       
 
-        function createKen(num) {
-            let kenArr = [];
-            for(let i = 0; i < num; i++) {
-                let rowArr = [];
-                for(let j = 0; j < num; j++) {
-                    rowArr.push(new Cell(i, j));
-                }
-                kenArr.push(rowArr);
-            }
-            return kenArr;
-        }
-
-        function fillKen(kenArr) {
-            indexOfUnion = 0;
-            arrOfUnions = [];
-            console.log('I am fill Ken');
-            const length = kenArr.length;
-            for(let i = 1; i <= length; i++) {
-                
-                for(let j = 0; j < length; j++) {
-                    let emptyCellInRow = kenArr[j].filter(function(cell) {
-                        return !cell.fill;
-                    })
-                    let restCellForFill = emptyCellInRow.filter(function(el) {
-                        let result = true;
-                        for(let z = 0; z < j; z++) {
-                            if(kenArr[z][el.col].num === i) result = false;
-                        }
-                        return result;
-                    })
-                   
-                    if(!restCellForFill.length) {
-                        for(let z = 0; z < j; z++) {
-                            kenArr[z].forEach(el => {
-                                if(el.num === i) {
-                                    el.num = null;
-                                    el.fill = false;
-                                }
-                            });
-                        }
-
-                        j = -1;
-                        continue;
-                    }   
-                    
-                    //console.log(j, restCellForFill);
-                    let col = Math.round(Math.random() * (restCellForFill.length - 1));
-                    let currentCell = restCellForFill[col];
-                    currentCell.fillNum(i);
-                    for(let i = 0; i < length; i++) {
-                        let result = '';
-                        for(let j = 0; j < length; j++){
-                            let cur = kenArr[i][j].num ? kenArr[i][j].num : 0;
-                            result += cur + " ";
-                        }
-                        //console.log(result); 
-                    }
-                    
-                }
-
-            }
-        }
-
-        function drawTable(arrObj) {
+        function drawResolvedTable(arrObj) {
             const $table = document.querySelector('table');
+            drawTable(arrObj, $table, true);
+        }
+
+        function drawTable(arrObj, $table, isresolved) {
+            
+            let tdInner = '';
             let inner = '';
             for(let i = 0; i < arrObj.length; i++) {
                 let row = '<tr>';
@@ -642,18 +654,31 @@
                         const border = arrObj[i][j].border ? arrObj[i][j].border : '';
                         const attr_oper = arrObj[i][j].oper_resAttr ? `data-oper = ${arrObj[i][j].oper_resAttr}` : '';
                         const attr_union = `data-union = ${arrObj[i][j].unionIndex}`;
-
-                            
-                            row += `<td class = 'cell ${border}' ${attr_oper} ${attr_union} tabindex = '1'>${arrObj[i][j].num}</td>`;
+                            if(isresolved) {
+                                tdInner = arrObj[i][j].num;
+                            }
+                            row += `<td class = 'cell ${border}' ${attr_oper} ${attr_union} tabindex = '1'>${tdInner}</td>`;
                     }
                 row += '</tr>';    
                 inner += row;
             }
-
             $table.innerHTML = inner;
+        }
+
+        function celebrateUserResolvedCorrect() {
+            alert('Ура!!! Все правильно!');
+        }
+        
+       
+
+        
+
+        function drawTableForResolve(arrObj) {
+            const $table = document.querySelector('table');
+            drawTable(arrObj, $table,  false);
 
             const $cells = $table.querySelectorAll('.cell');
-            console.log($cells);
+            //console.log($cells);
 
             $cells.forEach(cell => {
                 cell.addEventListener('click', event => {
@@ -668,6 +693,11 @@
                     let row = event.target.parentElement.rowIndex;
                     let col = event.target.cellIndex;
                     const currentUnionIndex = event.target.dataset.union;
+                    let currentUnion = arrOfUnions.find(un => {
+                        return un.index === +currentUnionIndex;
+                    })
+
+                    //console.log(currentUnion);
 
                     if(keyCode === 46 || keyCode === 8) {
                         event.target.textContent = null;
@@ -683,7 +713,7 @@
                         return cell.dataset.union === currentUnionIndex;
                     })
 
-                    console.log(cellsInCurrentUnion);
+                    //console.log(cellsInCurrentUnion);
 
                     cellsInCurrentRowArray.forEach(current => {
                         markCellInputIfRepeat($table, current);
@@ -693,13 +723,32 @@
                         markCellInputIfRepeat($table, current);
                    });
 
-                    console.log(event.keyCode);
-                    
+                   let resultUser = 0;
+                   if(currentUnion.cellsInUnion.length === 1) {
+                        resultUser = +event.target.textContent;
+                   } else {
+                        resultUser = getResultOfOperationInNode(cellsInCurrentUnion, currentUnion.oper);
+                   }
 
-                    if(+currentUnionIndex === 1) {
-                        console.log('ky ky');
-                        const styleElem = document.head.appendChild(document.createElement('style'));
-                        styleElem.innerHTML = ".cell[data-union = '1']::after {color: red;}"
+                   //console.log(resultUser);
+                   
+
+                   const hasEmptyCell = cellsInCurrentUnion.findIndex(cell => {
+                       return !cell.textContent;
+                   }) === -1 ? false : true;
+                 
+
+                    if(!hasEmptyCell && resultUser !== currentUnion.result) {
+                        
+                        cellsInCurrentUnion.forEach(cell => {
+                            cell.classList.add('wrongResult'); 
+                        })
+                    }else {
+                        cellsInCurrentUnion.forEach(cell => {
+                            if(cell.classList.contains('wrongResult')) {
+                                cell.classList.remove('wrongResult');
+                            }   
+                        })
                     }
 
 
@@ -732,6 +781,23 @@
                         }
                         
                     }
+
+                    if(!Array.from($cells).find(node =>{
+                        return !node.textContent
+                    })) {
+                        const isAnyMistake = Array.from($cells).find(node =>{
+                        console.log('node', node.textContent, 'arrObj', arrObj[+node.parentElement.rowIndex][+node.cellIndex].num);
+
+                        return +node.textContent !== arrObj[+node.parentElement.rowIndex][+node.cellIndex].num;
+                    })
+                        console.log(isAnyMistake);
+
+                        if(!isAnyMistake) {
+                            celebrateUserResolvedCorrect();
+                        }
+                    } 
+
+                    
                 }) 
             })               
                                    
@@ -812,8 +878,55 @@
                 alert('упсcccc!')
         }*/
         //row += `<td class = 'cell ${border}' ${attr}><input type="number" name="cell" class="cellInput" maxlength = "1" min = "1" max = "9"></td>`;  //${arrObj[i][j].num}
+         /*function setOperatorAndResult(union) {
+            let operatorAndResult = '';
+            let result = 0;
+            if(union.cellsInUnion.length === 1) {
+                operatorAndResult = union.cellsInUnion[0].num;
+            }else if(union.cellsInUnion.length === 2 ){ 
+                if(divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num) % 1 === 0 && (union.cellsInUnion[0].num !== 1 && union.cellsInUnion[1].num !== 1)){
+                    //console.log(union.cellsInUnion[0], union.cellsInUnion[1], divide(union.cellsInUnion[0], union.cellsInUnion[1]) % 1);
+                    operatorAndResult = divide(union.cellsInUnion[0].num, union.cellsInUnion[1].num) + String.fromCharCode(247);
+                }else {
+                    operatorAndResult = selectOperator(union, 3);
+                } 
+            } else {
+                operatorAndResult = selectOperator(union, 2);     
+            }
+            union.setOperatorAndResult(operatorAndResult);
+        }*/
+        /* function selectOperator(union, num) {
+            let result = 0;
+            let operator = Math.round(Math.random() * (num - 1) + 1);
+            switch(operator) {
+                    case 1 :
+                        operator = '+';
+                        result = union.cellsInUnion.reduce(function(acc, current){
+                            return acc + current.num; 
+                        }, 0);
+                        break;
+                    case 2 :
+                        operator = String.fromCharCode(215);
+                        result = union.cellsInUnion.reduce(function(acc, current){
+                            return acc * current.num; 
+                        }, 1);
+                        break;
+                    case 3 :
+                        operator = '-';
+                        result = Math.abs(union.cellsInUnion[0].num - union.cellsInUnion[1].num);
+                        break;
+                    default:
+                        alert('упсcccc!')
+                }
+            return result + operator;
+        }*/
         
+//const root = document.querySelector(':root');
+                   //const rootStyles = getComputedStyle(root);
+                   //let resultColor = rootStyles.getPropertyValue('--result-color');
 
+                    //const styleElem = document.head.appendChild(document.createElement('style'));
+                   // styleElem.innerHTML = `.cell[data-union = '${currentUnionIndex}']::after {color: red;}`
        
     </script>
 
