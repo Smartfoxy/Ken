@@ -1,0 +1,164 @@
+:root {
+    --result-color: black;
+    --union-index: 2;
+}
+@keyframes example {
+    from {border-color: blue;}
+    to {border-color: transparent;}
+}
+
+.container {
+    width: 800px;
+    height: 800px;
+    background-color: rgb(224, 224, 224);
+    margin: 50px auto;
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.tableContainer {
+    border: 2px solid blue;
+    padding: 20px;
+}
+.cell {
+    border: 1px solid gray;
+    height: 45px;
+    width: 45px;
+    text-align: center;
+    position: relative;
+    font-size: 28px;
+    color: green;
+}
+.cell::after {
+    content: attr(data-oper_res);
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var( --result-color, black);
+    font-size: 14px;
+}
+.cell.wrongResult::after {
+    color: red;
+}
+table {
+    border-collapse: collapse;
+    border: 3px solid black; 
+}
+.cell:focus{
+    background-color: #80808082;
+    outline: none;
+}
+.winner {
+    animation-name: example;
+    animation-duration: 0.2s; 
+    animation-iteration-count: 5;
+}
+
+
+/*.cellInput {
+    box-sizing: border-box;
+    background-color: lightblue;
+    padding: 5px;
+    border: 0;
+    width: 50px;
+    height: 50px;
+    font-size: 26px;
+    color: green;
+    text-align: center;
+    outline: none;
+    cursor: default;
+   /*caret-color: transparent;*/
+/*}
+input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.cellInput:focus{
+    background-color: aqua;
+}*/
+.red {
+    color: red;
+}
+.bottom {
+    border-bottom: 3px solid black;
+}
+.right {
+    border-right: 3px solid black;    
+}
+._0 {
+    background-color: red;
+}
+._1 {
+    background-color: yellow;
+}
+._2 {
+    background-color: green;
+}
+._3 {
+    background-color: blue;
+}
+._4 {
+    background-color: orange;
+}
+._5 {
+    background-color: lawngreen;
+}
+._6 {
+    background-color: lightcoral;
+}
+._7 {
+    background-color: rebeccapurple;
+}
+._8 {
+    background-color: tan;
+}
+._9 {
+    background-color: lightgray;
+}
+._10 {
+    background-color: brown;
+}
+._11 {
+    background-color: fuchsia;
+}
+._12 {
+    background-color: darkcyan;
+}
+._13 {
+    background-color: red;
+}
+._14 {
+    background-color: yellowgreen;
+}
+._15 {
+    background-color: aqua;
+}
+._16 {
+    background-color: yellow;
+}
+._17 {
+    background-color: green;
+}
+._18 {
+    background-color: blue;
+}
+._19 {
+    background-color: orange;
+}
+._20 {
+    background-color: lawngreen;
+}
+._21 {
+    background-color: lightcoral;
+}
+._22 {
+    background-color: rebeccapurple;
+}
+._23 {
+    background-color: tan;
+}
+._24 {
+    background-color: lightgray;
+}
