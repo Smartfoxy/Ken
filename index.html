@@ -8,24 +8,41 @@
 </head>
 <body>
     <div class="container">
-        <form name="kenOptions">
-            <label for="size">Размер:</label>
-            <select name="size" id="size">
-                <option value="4">4*4</option>
-                <option value="5">5*5</option>
-                <option value="6">6*6</option>
-                <option value="7">7*7</option>
-                <option value="8">8*8</option>
-                <option value="9">9*9</option>
-            </select>
-            <button type="button" class="btn" name="new">Новый</button>
-            <button type="button" class="btn" name="resolve">Решить</button>
-            <button type="button" class="btn" name="undo" disabled>Отменить</button>
-        </form>
-        <div class="tableContainer">
-            <table></table>
-        </div>
+        <header class ='header'>
+            <h2 class = 'title'>Ken-Ken</h2>
+            <span class = 'describtion'>Ваша цель - полностью заполнить сетку цифрами так, чтобы: каждая строка и каждый столбец содержали только 
+                одно вхождение каждой цифры, цифры в каждом блоке могут быть объединены, чтобы сформировать число, используя арифметическую операцию,
+                 указанную в подсказке.
+            </span>
+        </header>
         
+        <main class="gameSpace">
+            
+                <form name="kenOptions">
+                    <div class="selectContainer">
+                        <label for="size">Размер:</label>
+                        <select name="size" id="size">
+                            <option value="4">4*4</option>
+                            <option value="5">5*5</option>
+                            <option value="6">6*6</option>
+                            <option value="7">7*7</option>
+                            <option value="8">8*8</option>
+                            <option value="9">9*9</option>
+                        </select>
+                    </div>
+                    <div class="buttonsContainer">
+                        <button type="button" class="btn" name="new">Новая игра</button>
+                        <button type="button" class="btn" name="reload">Перегрузить игру</button>
+                        <button type="button" class="btn" name="resolve">Решить игру</button>
+                        <button type="button" class="btn" name="undo" disabled>Отменить ход</button>
+                        <button type="button" class="btn" name="redo" disabled >Повторить ход</button>
+                    </div>
+                </form>
+            
+            <div class="tableContainer">
+                <table></table>
+            </div>
+        </main>  
     </div>
     
     <script src="main.js"></script>  

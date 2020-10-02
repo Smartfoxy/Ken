@@ -1,25 +1,67 @@
-:root {
-    --result-color: black;
-    --union-index: 2;
-}
 @keyframes example {
     from {border-color: blue;}
     to {border-color: transparent;}
 }
-
+body {
+    margin: 0;
+}
 .container {
-    width: 800px;
-    height: 800px;
-    background-color: rgb(224, 224, 224);
-    margin: 50px auto;
+    min-width: 550px;
+    height: 100vh;
+    background-color: rgb(212, 212, 212);
+    padding: 20px;
+    box-sizing: border-box;
+}
+.header,
+.gameSpace {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 20px;
+}
+.title {
+    color: blue;
+}
+.describtion {
+    text-align: center;
+    font: italic calc(12px + 0.6vmax) serif;
+}
+form {
+    margin-bottom: 20px;
     display: flex;
-    flex-flow: column wrap;
-    align-items: center;
+    flex-flow: row nowrap;
     justify-content: space-evenly;
+}
+.selectContainer {
+    width: 25%;
+    box-sizing: border-box;
+    align-self: start;
+    padding-top: 5px;
+}
+.buttonsContainer {
+    width: 75%;
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
+    align-content: center;
+}
+select[name="size"] {
+    width: 60px;
+    padding-left: 5px;
+}
+.btn {
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 .tableContainer {
     border: 2px solid blue;
-    padding: 20px;
+    padding: 12px;
+    display: inline-block;
+}
+table {
+    border-collapse: collapse;
+    border: 3px solid black; 
 }
 .cell {
     border: 1px solid gray;
@@ -35,15 +77,11 @@
     position: absolute;
     left: 0;
     top: 0;
-    color: var( --result-color, black);
+    color: black;
     font-size: 14px;
 }
 .cell.wrongResult::after {
     color: red;
-}
-table {
-    border-collapse: collapse;
-    border: 3px solid black; 
 }
 .cell:focus{
     background-color: #80808082;
@@ -54,30 +92,6 @@ table {
     animation-duration: 0.2s; 
     animation-iteration-count: 5;
 }
-
-
-/*.cellInput {
-    box-sizing: border-box;
-    background-color: lightblue;
-    padding: 5px;
-    border: 0;
-    width: 50px;
-    height: 50px;
-    font-size: 26px;
-    color: green;
-    text-align: center;
-    outline: none;
-    cursor: default;
-   /*caret-color: transparent;*/
-/*}
-input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-.cellInput:focus{
-    background-color: aqua;
-}*/
 .red {
     color: red;
 }
@@ -86,79 +100,4 @@ input::-webkit-outer-spin-button,
 }
 .right {
     border-right: 3px solid black;    
-}
-._0 {
-    background-color: red;
-}
-._1 {
-    background-color: yellow;
-}
-._2 {
-    background-color: green;
-}
-._3 {
-    background-color: blue;
-}
-._4 {
-    background-color: orange;
-}
-._5 {
-    background-color: lawngreen;
-}
-._6 {
-    background-color: lightcoral;
-}
-._7 {
-    background-color: rebeccapurple;
-}
-._8 {
-    background-color: tan;
-}
-._9 {
-    background-color: lightgray;
-}
-._10 {
-    background-color: brown;
-}
-._11 {
-    background-color: fuchsia;
-}
-._12 {
-    background-color: darkcyan;
-}
-._13 {
-    background-color: red;
-}
-._14 {
-    background-color: yellowgreen;
-}
-._15 {
-    background-color: aqua;
-}
-._16 {
-    background-color: yellow;
-}
-._17 {
-    background-color: green;
-}
-._18 {
-    background-color: blue;
-}
-._19 {
-    background-color: orange;
-}
-._20 {
-    background-color: lawngreen;
-}
-._21 {
-    background-color: lightcoral;
-}
-._22 {
-    background-color: rebeccapurple;
-}
-._23 {
-    background-color: tan;
-}
-._24 {
-    background-color: lightgray;
 }
