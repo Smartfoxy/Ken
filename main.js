@@ -1,5 +1,16 @@
 "use strict"
 
+const $kenOptionsForm = document.forms.kenOptions;
+
+let kenArr = [];
+let indexOfUnion = 0;
+let arrOfUnions = [];
+let mooves = [];
+let moovesInStack = -1;
+let currentMooveIndex = -1;
+let num = 4;
+let tab = 1;
+
 class Cell {
     constructor(row, col) {
         this.row = row;
@@ -61,16 +72,6 @@ class Moove {
     }
 }
 
-const $kenOptionsForm = document.forms.kenOptions;
-
-let kenArr = [];
-let indexOfUnion = 0;
-let arrOfUnions = [];
-let mooves = [];
-let moovesInStack = -1;
-let currentMooveIndex = -1;
-let num = 4;
-let tab = 1;
 process(num);
 
 function process(num) {
@@ -218,7 +219,6 @@ function unionCells(arrOfCells) {
                     let freeDirections = [1, 2, 3, 4];
                     let dir;
                     do {
-                        //let [x1, y1, dir] = getNextCellcoordinates(x, y, freeDirections); что не так?
                         let arr = getNextCellcoordinates(x, y, freeDirections);
                         x1 = arr[0];
                         y1 = arr[1];
@@ -694,7 +694,6 @@ function markCellIfRepeat(table, cell) {
         }
     }
 }
-
 function saveMoove(cell, prev) {
     const row = cell.parentElement.rowIndex;
     const col = cell.cellIndex;
