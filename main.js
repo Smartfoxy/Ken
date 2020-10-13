@@ -216,8 +216,8 @@ function unionCells(arrOfCells) {
                 if (z !== 0) {
                     let x1;
                     let y1;
-                    let freeDirections = [1, 2, 3, 4];
                     let dir;
+                    let freeDirections = [1, 2, 3, 4];
                     do {
                         let arr = getNextCellcoordinates(x, y, freeDirections);
                         x1 = arr[0];
@@ -277,7 +277,6 @@ function getAllExistNeighbors(arrOfCells, x, y) {
 }
 
 function getNextCellcoordinates(x, y, freeDirections) {
-    let arrCoordinates = [];
     const index = Math.round(Math.random() * (freeDirections.length - 1));
     const direction = freeDirections[index];
     switch (direction) {
@@ -296,9 +295,7 @@ function getNextCellcoordinates(x, y, freeDirections) {
         default:
             alert('упс!');
     }
-    arrCoordinates[0] = x;
-    arrCoordinates[1] = y;
-    arrCoordinates[2] = direction;
+    const arrCoordinates = [x, y, direction];
     return arrCoordinates;
 }
 
